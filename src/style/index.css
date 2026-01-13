@@ -1,0 +1,11 @@
+@import url('./color.css');
+@import url('./common.css');
+
+body {
+  padding: 0;
+  margin: 0;
+}
+
+div {
+  box-sizing: border-box;
+}

@@ -1,0 +1,27 @@
+:root[theme-color='purple'] {
+  --td-brand-color: #1d1132; /* 深黑紫色 */
+  --td-brand-color-1: #e0d8eb; /* 最浅色 */
+  --td-brand-color-2: #c8bdd6;
+  --td-brand-color-3: #b0a2c1;
+  --td-brand-color-4: #9887ac;
+  --td-brand-color-5: #806c97;
+  --td-brand-color-6: #685182;
+  --td-brand-color-7: #50366d;
+  --td-brand-color-8: #3d2266; /* 主色，深黑紫 */
+  --td-brand-color-9: #2d194c;
+  --td-brand-color-10: #1d1132; /* 最深色，接近纯黑 */
+}
+
+:root[theme-color='purple'][theme-mode='dark'] {
+  --td-brand-color: #50366d;
+  --td-brand-color-1: #1d1132; /* 最深色，接近黑色 */
+  --td-brand-color-2: #2d194c;
+  --td-brand-color-3: #3d2266;
+  --td-brand-color-4: #50366d;
+  --td-brand-color-5: #634a80;
+  --td-brand-color-6: #765d93;
+  --td-brand-color-7: #8970a6;
+  --td-brand-color-8: #9c83b9;
+  --td-brand-color-9: #af96cc;
+  --td-brand-color-10: #c2a9df; /* 深色模式下的最浅色 */
+}

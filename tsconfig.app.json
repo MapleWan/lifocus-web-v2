@@ -7,6 +7,6 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["env.d.ts", "src/**/*", "src/**/*.vue", "node_modules/tdesign-vue-next/global.d.ts"],
+  "include": ["env.d.ts", "src/**/*", "src/**/*.vue", "node_modules/tdesign-vue-next/global.d.ts", "src/types/**/*.d.ts"],
   "exclude": ["src/**/__tests__/*"]
 }

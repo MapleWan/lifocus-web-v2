@@ -58,16 +58,17 @@ function login() {
     if (res === true) {
       Cookies.set('isRemember', String(rememberMe.value))
       loginApi(loginForm).then((res) => {
+        console.log(res)
         if (res.code === 200) {
           setToken(res.data.access_token, res.data.refresh_token, String(res.data.expire_time))
           useMessage.success('Login success')
           router.push({ name: 'dashboard' })
         }
         else {
-          throw new Error('""')
+          throw new Error(res?.message || '登录失败')
         }
       }).catch((error) => {
-        useMessage.error(`${error}`)
+        useMessage.error(`${error.message}`)
       })
     }
   })

@@ -52,10 +52,10 @@ function register() {
           router.push({ name: 'login' })
         }
         else {
-          throw new Error('""')
+          throw new Error(res?.message || '注册失败')
         }
       }).catch((error) => {
-        useMessage.error(`${error}`)
+        useMessage.error(`${error.message}`)
       })
     }
   })
@@ -75,8 +75,10 @@ function goToSignin() {
       To get started, you need to sign up here.
     </div>
     <div class="div-border-shadow bg-background-white p-6">
-      <TForm ref="registerFormRef" :data="registerForm" :rules="rules" label-align="top" :required-mark="false"
-        @keydown.enter="register">
+      <TForm
+        ref="registerFormRef" :data="registerForm" :rules="rules" label-align="top" :required-mark="false"
+        @keydown.enter="register"
+      >
         <TFormItem name="username">
           <template #label>
             <div class="text-primary-100 font-bold">

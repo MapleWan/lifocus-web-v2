@@ -1,35 +1,31 @@
-import type {
-  ILoginParams,
-  ILoginResult,
-  IRegisterParams,
-  IRegisterResult,
-} from '@/types/loginTypes'
-import request from '@/utils/request'
+import type { ILoginParams, ILoginResult, IRegisterParams, IRegisterResult } from '@/types/loginTypes'
+import { httpClient } from '@/utils/request'
 
-/*
- * 登录
- * @param data
- *  { username: string; password: string }
- * @returns { Promise<LoginResult> }
+/**
+ * 登录接口
  */
 export function loginApi(data: ILoginParams) {
-  return request({
+  return httpClient.post<ILoginResult>({
     url: '/auth/login',
-    method: 'post',
     data,
-  }) as Promise<ILoginResult>
+  })
 }
 
 /**
- * 注册
- * @param data
- *  { username: string; password: string; email: string }
- * @returns { Promise<LoginResult> }
+ * 注册接口
  */
 export function registerApi(data: IRegisterParams) {
-  return request({
+  return httpClient.post<IRegisterResult>({
     url: '/auth/register',
-    method: 'post',
     data,
-  }) as Promise<IRegisterResult>
+  })
+}
+
+/**
+ * 登出接口
+ */
+export function logoutApi() {
+  return httpClient.post({
+    url: '/auth/logout',
+  })
 }

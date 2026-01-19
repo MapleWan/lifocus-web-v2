@@ -1,3 +1,5 @@
+import type { IApiResponse } from './apiTypes'
+
 /**
  * 登录参数
  */
@@ -9,15 +11,13 @@ export interface ILoginParams {
 /**
  * 登录结果
  */
-export interface ILoginResult {
-  code: number
-  message: string
-  data: {
-    access_token: string
-    refresh_token: string
-    expire_time: number
-  }
+interface LoginResult {
+  access_token: string
+  refresh_token: string
+  expire_time: number
 }
+
+export type ILoginResult = IApiResponse<LoginResult>
 
 /**
  * 注册参数
@@ -32,22 +32,15 @@ export interface IRegisterParams {
 /**
  * 注册结果
  */
-export interface IRegisterResult {
-  code: number
-  message: string
-  data: {
-    id: string
-    username: string
-    nickname: string
-    email: string
-    avatar: string
-    role: string
-    create_time: string
-    update_time: string
-  }
+export interface IUserInfo {
+  id: string
+  username: string
+  nickname: string
+  email: string
+  avatar: string
+  role: string
+  create_time: string
+  update_time: string
 }
 
-/**
- * 用户信息
- */
-export type IUserInfo = IRegisterResult['data']
+export type IRegisterResult = IApiResponse<IUserInfo>

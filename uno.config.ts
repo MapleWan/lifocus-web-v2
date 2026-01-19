@@ -39,11 +39,11 @@ export default defineConfig({
         white: '#fff',
         hover: '#eeedf5',
       },
-      // font: {
-      //   primary: '#0a0a0a',
-      //   revert: '#f2f2f2',
-      //   hover: '#834ec2',
-      // },
+      font: {
+        primary: '#0a0a0a',
+        revert: '#f2f2f2',
+        hover: '#834ec2',
+      },
     },
   },
 })

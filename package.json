@@ -18,14 +18,16 @@
   "dependencies": {
     "@types/axios": "^0.14.4",
     "@types/js-cookie": "^3.0.6",
+    "@unocss/reset": "^66.6.0",
     "animate.css": "^4.1.1",
     "axios": "^1.13.2",
     "js-cookie": "^3.0.5",
-    "normalize.css": "^8.0.1",
     "pinia": "^3.0.4",
+    "simplebar-vue": "^2.4.2",
     "tdesign-icons-vue-next": "^0.4.1",
     "tdesign-vue-next": "^1.17.7",
     "unocss": "^66.5.12",
+    "vite-svg-loader": "^5.1.0",
     "vue": "^3.5.26",
     "vue-router": "^4.6.4"
   },

@@ -4,10 +4,13 @@ import vueJsx from '@vitejs/plugin-vue-jsx'
 import UnoCSS from 'unocss/vite'
 import { defineConfig } from 'vite'
 import vueDevTools from 'vite-plugin-vue-devtools'
+import svgLoader from 'vite-svg-loader'
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [vue(), vueJsx(), vueDevTools(), UnoCSS()],
+  plugins: [vue(), vueJsx(), vueDevTools(), UnoCSS(), svgLoader({
+    defaultImport: 'component',
+  })],
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
@@ -20,7 +23,7 @@ export default defineConfig({
         target: 'http://0.0.0.0:5003',
         // target: 'http://118.25.79.223/5003',
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, '/api'),
+        rewrite: path => path.replace(/^\/api/, '/api'),
       },
     },
   },

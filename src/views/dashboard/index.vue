@@ -8,7 +8,7 @@ import rightList from './components/right-list.vue'
     <div class="left w-full h-full overflow-hidden rounded-lg p-4">
       <left-bar />
     </div>
-    <div class="right h-full rounded-lg bg-background-white p-4">
+    <div class="right h-full overflow-hidden rounded-lg bg-background-white p-4">
       <right-list />
     </div>
   </div>

@@ -15,7 +15,8 @@ export function setToken(accessToken: string, refreshToken: string, expireTime: 
     Cookies.set('accessToken', accessToken, { expires: 1 / 24 })
     Cookies.set('refreshToken', refreshToken, { expires: 1 / 24 })
     Cookies.set('expiryTime', expireTime, { expires: 1 / 24 })
-  } else {
+  }
+  else {
     sessionStorage.setItem('accessToken', accessToken)
     sessionStorage.setItem('refreshToken', refreshToken)
     sessionStorage.setItem('expireTime', expireTime)
@@ -33,7 +34,8 @@ export function getToken() {
       refreshToken: Cookies.get('refreshToken'),
       expireTime: Cookies.get('expiryTime'),
     }
-  } else {
+  }
+  else {
     return {
       accessToken: sessionStorage.getItem('accessToken'),
       refreshToken: sessionStorage.getItem('refreshToken'),
@@ -49,7 +51,8 @@ export function getRefreshToken() {
   const isRemember = Cookies.get('isRemember')
   if (isRemember === 'true') {
     return Cookies.get('refreshToken')
-  } else {
+  }
+  else {
     return sessionStorage.getItem('refreshToken')
   }
 }

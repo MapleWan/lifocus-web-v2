@@ -1,4 +1,4 @@
-import type { AxiosInstance, InternalAxiosRequestConfig } from 'axios'
+import type { AxiosInstance } from 'axios'
 import type { LFRequestConfig } from './type'
 import axios from 'axios'
 import { useTdMessage } from '@/hooks/useTdMessage'
@@ -22,6 +22,7 @@ class LFRequest {
         return err
       },
     )
+    const interceptors = config?.interceptors
     this.instance.interceptors.response.use(
       (res) => {
         return res.data
@@ -40,8 +41,8 @@ class LFRequest {
 
     // 针对特定的LFRequest实例添加拦截器
     this.instance.interceptors.request.use(
-      config.interceptors?.requestSuccessFn,
-      config.interceptors?.requestFailureFn,
+      interceptors?.requestSuccessFn,
+      interceptors?.requestFailureFn,
     )
     this.instance.interceptors.response.use(
       config.interceptors?.responseSuccessFn,
@@ -55,7 +56,7 @@ class LFRequest {
     // return this.instance.request<any, T>(config)
     // 单次请求的成功拦截处理
     if (config.interceptors?.requestSuccessFn) {
-      config = config.interceptors.requestSuccessFn(config as InternalAxiosRequestConfig)
+      config = config.interceptors.requestSuccessFn(config)
     }
     return new Promise<T>((resolve, reject) => {
       this.instance

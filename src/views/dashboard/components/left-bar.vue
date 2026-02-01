@@ -13,8 +13,8 @@ const projectList = ref<TProjectList>([])
 onMounted(() => {
   getRecentProjectListApi().then((res) => {
     projectList.value = res.data
-    console.log(res.data)
-    console.log(res.data[0]?.id || 'No project found')
+    // console.log(res.data)
+    // console.log(res.data[0]?.id || 'No project found')
   })
 })
 </script>

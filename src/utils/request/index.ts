@@ -20,7 +20,7 @@ export const httpClient = new LFRequest({
       }
 
       const token = getToken()?.accessToken || ''
-      console.log(token, '配置')
+      // console.log(token, '配置')
 
       if (token && config.headers) {
         config.headers.Authorization = `Bearer ${token}`

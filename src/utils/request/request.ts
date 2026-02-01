@@ -82,6 +82,10 @@ class LFRequest {
     return this.request({ ...config, method: 'POST' })
   }
 
+  put<T = any>(config: LFRequestConfig<T>) {
+    return this.request({ ...config, method: 'PUT' })
+  }
+
   delete<T = any>(config: LFRequestConfig<T>) {
     return this.request({ ...config, method: 'DELETE' })
   }

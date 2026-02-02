@@ -2,9 +2,9 @@
 import type { FormProps } from 'tdesign-vue-next'
 import type { IAddTimelineParams, TTimelineList } from '@/types/timelineTypes'
 import dayjs from 'dayjs'
-import { Button as TButton, Dialog as TDialog, Form as TForm, FormItem as TFormItem, Input as TInput, Option as TOption, Select as TSelect, Textarea as TTextarea, Timeline as TTimeLine, TimelineItem as TTimeLineItem } from 'tdesign-vue-next'
+import { Button as TButton, DatePicker as TDatePicker, Dialog as TDialog, Form as TForm, FormItem as TFormItem, Input as TInput, Option as TOption, Select as TSelect, Textarea as TTextarea, Timeline as TTimeLine, TimelineItem as TTimeLineItem } from 'tdesign-vue-next'
 
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 import { addTimelineApi, getTodayTimelineApi } from '@/api/timeline'
 import NoDataIcon from '@/assets/svg/noData.svg'
 import { useTdMessage } from '@/hooks/useTdMessage'
@@ -24,22 +24,6 @@ const statusToColor = ETimelineStatus.reduce((acc, cur) => {
   acc[cur.value] = cur.dotColor
   return acc
 }, {} as Record<string, string>)
-function getTodayTimeline() {
-  getTodayTimelineApi(
-    {
-      create_start_time: `${dayjs().format('YYYY-MM-DD')} 00:00:00`,
-      create_end_time: `${dayjs().format('YYYY-MM-DD')} 23:59:59`,
-    },
-  ).then((res) => {
-    timeLineList.value = res.data
-    options.value = res.data.map(item => ({
-      label: `${dayjs(item.create_time).format('YYYY-MM-DD HH:mm:ss')} ${item?.end_time ? ` ~ ${dayjs(item.end_time).format('YYYY-MM-DD HH:mm:ss')}` : ''}`,
-      content: `${item.title}\n${item.content}`,
-      dotColor: statusToColor[item.status],
-      item,
-    }))
-  })
-}
 
 const timelineFormDialogVisible = ref(false)
 const timelineFormData = ref<IAddTimelineParams>({
@@ -80,6 +64,26 @@ function handleTimelineSubmit() {
   })
 }
 
+const currentDate = ref(dayjs().format('YYYY-MM-DD'))
+watch(currentDate, () => {
+  getTodayTimeline()
+})
+function getTodayTimeline() {
+  getTodayTimelineApi(
+    {
+      create_start_time: `${dayjs(currentDate.value).format('YYYY-MM-DD')} 00:00:00`,
+      create_end_time: `${dayjs(currentDate.value).format('YYYY-MM-DD')} 23:59:59`,
+    },
+  ).then((res) => {
+    timeLineList.value = res.data
+    options.value = res.data.map(item => ({
+      label: `${dayjs(item.create_time).format('YYYY-MM-DD HH:mm:ss')} ${item?.end_time ? ` ~ ${dayjs(item.end_time).format('YYYY-MM-DD HH:mm:ss')}` : ''}`,
+      content: `${item.title}\n${item.content}`,
+      dotColor: statusToColor[item.status],
+      item,
+    }))
+  })
+}
 onMounted(() => {
   getTodayTimeline()
 })
@@ -87,8 +91,9 @@ onMounted(() => {
 
 <template>
   <div class="h-full overflow-hidden flex flex-col">
-    <div class="font-bold text-primary-90">
-      今日时间线 ({{ dayjs().format('YYYY-MM-DD') }})
+    <div class="font-bold text-primary-90 flex justify-between items-center">
+      时间线 ({{ currentDate }})
+      <TDatePicker v-model="currentDate" />
     </div>
     <div class="flex-1 overflow-hidden">
       <ScrollBar class="h-full p-4">

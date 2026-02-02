@@ -24,6 +24,7 @@
     "dayjs": "^1.11.19",
     "js-cookie": "^3.0.5",
     "pinia": "^3.0.4",
+    "pinia-plugin-persistedstate": "^4.7.1",
     "simplebar-vue": "^2.4.2",
     "tdesign-icons-vue-next": "^0.4.1",
     "tdesign-vue-next": "^1.17.7",

@@ -9,7 +9,10 @@ import { useRouter } from 'vue-router'
 import { loginApi } from '@/api/auth'
 // import { useCustomMessage } from '@/hooks/useCustomMessage'
 import { useTdMessage } from '@/hooks/useTdMessage'
+import { useUserStore } from '@/stores/user'
 import { setToken } from '@/utils/auth'
+
+const userStore = useUserStore()
 
 const router = useRouter()
 
@@ -62,7 +65,9 @@ function login() {
         if (res.code === 200) {
           setToken(res.data.access_token, res.data.refresh_token, String(res.data.expire_time))
           useMessage.success('Login success')
-          router.push({ name: 'dashboard' })
+          userStore.getCurrentUser().then(() => {
+            router.push({ name: 'dashboard' })
+          })
         }
         else {
           throw new Error(res?.message || '登录失败')

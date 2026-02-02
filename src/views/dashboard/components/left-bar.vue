@@ -12,8 +12,10 @@ import ProjectIcon from '@/assets/svg/project.svg'
 import SearchIcon from '@/assets/svg/search.svg'
 import SettingIcon from '@/assets/svg/setting.svg'
 import { useTdMessage } from '@/hooks/useTdMessage'
+import { useUserStore } from '@/stores/user'
 
 const router = useRouter()
+const userStore = useUserStore()
 const tdMessage = useTdMessage()
 const projectList = ref<TProjectList>([])
 
@@ -76,7 +78,7 @@ onMounted(() => {
     <div class="bottom-bar flex justify-between items-center ">
       <img src="@/assets/images/favicon1.jpg" class="w-8 h-8 rounded" alt="avator">
       <div class="w-full p-2 font-bold text-overflow">
-        Maple Wan
+        {{ userStore.nickname }}
       </div>
       <!-- <SettingIcon class="w-6 h-6 cursor-pointer hover:c-font-hover" /> -->
       <TPopconfirm content="退出登录？" @confirm="logout">

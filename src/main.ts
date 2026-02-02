@@ -1,4 +1,6 @@
 import { createPinia } from 'pinia'
+import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
+
 import simplebar from 'simplebar-vue'
 import { createApp } from 'vue'
 import App from './App.vue'
@@ -15,7 +17,9 @@ const app = createApp(App)
 // 滚动条组件 类似于 el-scrollbar
 app.component('ScrollBar', simplebar)
 
-app.use(createPinia())
+const pinia = createPinia()
+pinia.use(piniaPluginPersistedstate)
+app.use(pinia)
 app.use(router)
 
 app.mount('#app')

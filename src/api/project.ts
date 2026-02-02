@@ -22,7 +22,7 @@ interface IProjectListParams {
   update_end_time?: string
 }
 // 获取项目列表，非分页接口
-export function getProjectListApi(params: IProjectListParams) {
+export function getProjectListApi(params?: IProjectListParams) {
   return httpClient.get<TProjectResult>({
     url: '/project/user-project',
     params,

@@ -29,3 +29,12 @@ export function logoutApi() {
     url: '/auth/logout',
   })
 }
+
+/**
+ * 查询当前用户信息
+ */
+export function getCurrentUserApi() {
+  return httpClient.get<IRegisterResult>({
+    url: '/user',
+  })
+}

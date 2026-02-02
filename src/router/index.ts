@@ -37,6 +37,24 @@ const defaultRoutes: Array<RouteRecordRaw> = [
     },
     component: () => import('@/views/dashboard/index.vue'),
   },
+  {
+    path: '/project',
+    name: 'project',
+    meta: {
+      title: '项目',
+    },
+    component: () => import('@/layout/ProjectLayout/index.vue'),
+    children: [
+      {
+        path: '/project/dashboard',
+        name: 'projectDashboard',
+        meta: {
+          title: '项目工作台',
+        },
+        component: () => import('@/views/project/index.vue'),
+      },
+    ],
+  },
 ]
 
 const router = createRouter({

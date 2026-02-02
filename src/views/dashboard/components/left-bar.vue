@@ -1,14 +1,30 @@
 <script setup lang="ts">
 import type { TProjectList } from '@/types/projectTypes'
+import { Popconfirm as TPopconfirm } from 'tdesign-vue-next'
 import { onMounted, ref } from 'vue'
-import { getRecentProjectListApi } from '@/api/project'
 
+import { useRouter } from 'vue-router'
+import { logoutApi } from '@/api/auth'
+import { getRecentProjectListApi } from '@/api/project'
+import LogoutIcon from '@/assets/svg/logout.svg'
 import NoDataIcon from '@/assets/svg/noData.svg'
 import ProjectIcon from '@/assets/svg/project.svg'
 import SearchIcon from '@/assets/svg/search.svg'
 import SettingIcon from '@/assets/svg/setting.svg'
+import { useTdMessage } from '@/hooks/useTdMessage'
 
+const router = useRouter()
+const tdMessage = useTdMessage()
 const projectList = ref<TProjectList>([])
+
+function logout() {
+  logoutApi().then((res) => {
+    if (res.code === 200) {
+      tdMessage.success('退出登录成功')
+      router.push({ name: 'login' })
+    }
+  })
+}
 
 onMounted(() => {
   getRecentProjectListApi().then((res) => {
@@ -62,7 +78,10 @@ onMounted(() => {
       <div class="w-full p-2 font-bold text-overflow">
         Maple Wan
       </div>
-      <SettingIcon class="w-10 h-10 cursor-pointer hover:c-font-hover" />
+      <!-- <SettingIcon class="w-6 h-6 cursor-pointer hover:c-font-hover" /> -->
+      <TPopconfirm content="退出登录？" @confirm="logout">
+        <LogoutIcon class="w-6 h-6 cursor-pointer hover:c-font-hover" />
+      </TPopconfirm>
     </div>
   </div>
 </template>

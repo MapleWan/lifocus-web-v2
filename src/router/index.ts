@@ -46,12 +46,28 @@ const defaultRoutes: Array<RouteRecordRaw> = [
     component: () => import('@/layout/ProjectLayout/index.vue'),
     children: [
       {
+        path: '/project/dialog',
+        name: 'projectDialog',
+        meta: {
+          title: '对话框',
+        },
+        component: () => import('@/views/project/dialog.vue'),
+      },
+      {
         path: '/project/dashboard',
         name: 'projectDashboard',
         meta: {
           title: '项目工作台',
         },
         component: () => import('@/views/project/index.vue'),
+      },
+      {
+        path: '/project/create',
+        name: 'articleCreate',
+        meta: {
+          title: '创建文章',
+        },
+        component: () => import('@/views/project/create.vue'),
       },
     ],
   },

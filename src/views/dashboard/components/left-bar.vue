@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { TProjectList } from '@/types/projectTypes'
+import type { IProjectInfo, TProjectList } from '@/types/projectTypes'
 import { Popconfirm as TPopconfirm } from 'tdesign-vue-next'
 import { onMounted, ref } from 'vue'
 
@@ -12,12 +12,18 @@ import ProjectIcon from '@/assets/svg/project.svg'
 import SearchIcon from '@/assets/svg/search.svg'
 import SettingIcon from '@/assets/svg/setting.svg'
 import { useTdMessage } from '@/hooks/useTdMessage'
+import { useMainStore } from '@/stores/main'
 import { useUserStore } from '@/stores/user'
 
 const router = useRouter()
+const mainStore = useMainStore()
 const userStore = useUserStore()
 const tdMessage = useTdMessage()
 const projectList = ref<TProjectList>([])
+function openProject(project: IProjectInfo) {
+  mainStore.setCurrentProjectId(project.id)
+  router.push({ name: 'projectDashboard' })
+}
 
 function logout() {
   logoutApi().then((res) => {
@@ -58,6 +64,7 @@ onMounted(() => {
             <div
               class="project-item relative flex items-center cursor-pointer hover:bg-background-hover p-2 rounded"
               :title="project.name"
+              @click="openProject(project)"
             >
               <ProjectIcon v-if="!project.icon" class="m-r-1 w-6 h-6 flex-shrink-0" />
               <img v-else :src="project.icon" class="m-r-1 w-6 h-6 flex-shrink-0">

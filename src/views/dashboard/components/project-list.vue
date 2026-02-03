@@ -5,6 +5,7 @@ import type { IProjectInfo } from '@/types/projectTypes'
 import dayjs from 'dayjs'
 import { Dropdown as TDropdown, DropdownItem as TDropdownItem, RadioButton as TRadioButton, RadioGroup as TRadioGroup, Table as TTable } from 'tdesign-vue-next'
 import { onMounted, ref, watch } from 'vue'
+import { useRouter } from 'vue-router'
 import { getProjectListApi } from '@/api/project'
 import ActiveIcon from '@/assets/svg/active.svg'
 import CardIcon from '@/assets/svg/card.svg'
@@ -12,7 +13,10 @@ import CollectionIcon from '@/assets/svg/collection.svg'
 import ListIcon from '@/assets/svg/list.svg'
 import SortIcon from '@/assets/svg/sort.svg'
 import ProjectCard from '@/components/ProjectCard/index.vue'
+import { useMainStore } from '@/stores/main'
 
+const mainStore = useMainStore()
+const router = useRouter()
 const currentProjectTabType: Ref<'active' | 'archived'> = ref('active')
 function changeProjectTabType(type: 'active' | 'archived') {
   currentProjectTabType.value = type
@@ -78,6 +82,15 @@ const sortChange: TableProps['onSortChange'] = (sortVal, _) => {
   if (!Array.isArray(sortVal)) {
     getProjectList(sortVal.sortBy as keyof IProjectInfo, sortVal.descending ? 'desc' : 'asc')
   }
+}
+
+const tableRowOpenProject: TableProps['onRowClick'] = (data) => {
+  openProject(data.row.id)
+}
+
+function openProject(projectId: string) {
+  mainStore.setCurrentProjectId(projectId)
+  router.push({ name: 'projectDashboard' })
 }
 </script>
 
@@ -150,11 +163,11 @@ const sortChange: TableProps['onSortChange'] = (sortVal, _) => {
           <!-- <ProjectCard /> -->
           <template v-if="listType === 'card'">
             <template v-for="project in projectList" :key="project.id">
-              <ProjectCard :project-info="project" />
+              <ProjectCard :project-info="project" @click="openProject(project.id)" />
             </template>
           </template>
           <template v-else>
-            <TTable :columns="tableColumns" :data="projectList" @sort-change="sortChange" />
+            <TTable :columns="tableColumns" :data="projectList" row-key="id" row-class-name="cursor-pointer" :hover="true" @sort-change="sortChange" @row-click="tableRowOpenProject" />
           </template>
         </div>
       </ScrollBar>

@@ -1,29 +1,45 @@
 <script setup lang="ts">
 import type { TProjectList } from '@/types/projectTypes'
 import { Option as TOption, Popup as TPopup, RadioButton as TRadioButton, RadioGroup as TRadioGroup, Select as TSelect } from 'tdesign-vue-next'
-import { onMounted, ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { onMounted, ref, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { logoutApi } from '@/api/auth'
 import { getProjectListApi } from '@/api/project'
 import ChatIcon from '@/assets/svg/chat.svg'
 import CreateIcon from '@/assets/svg/create.svg'
 import DashboardIcon from '@/assets/svg/dashboard.svg'
 import { useTdMessage } from '@/hooks/useTdMessage'
+import { useMainStore } from '@/stores/main'
 import { useUserStore } from '@/stores/user'
 
 const userStore = useUserStore()
+const mainStore = useMainStore()
 const router = useRouter()
+const route = useRoute()
 const tdMessage = useTdMessage()
-const project = ref('')
+const project = ref(mainStore.currentProjectId)
 const projectList = ref<TProjectList>([])
-onMounted(() => {
-  getProjectListApi().then((res) => {
-    projectList.value = res.data
-  })
+
+watch(project, (newValue) => {
+  mainStore.setCurrentProjectId(newValue)
 })
 
 export type TTabType = 'dailog' | 'dashboard' | 'create'
 const tabType = ref('dashboard')
+
+watch(tabType, (newValue) => {
+  switch (newValue) {
+    case 'dailog':
+      router.push({ name: 'projectDialog' })
+      break
+    case 'dashboard':
+      router.push({ name: 'projectDashboard' })
+      break
+    case 'create':
+      router.push({ name: 'articleCreate' })
+      break
+  }
+})
 
 function logout() {
   logoutApi().then((res) => {
@@ -33,13 +49,34 @@ function logout() {
     }
   })
 }
+
+function goToDashboard() {
+  router.push({ name: 'dashboard' })
+}
+
+onMounted(() => {
+  switch (route.name) {
+    case 'projectDialog':
+      tabType.value = 'dailog'
+      break
+    case 'projectDashboard':
+      tabType.value = 'dashboard'
+      break
+    case 'articleCreate':
+      tabType.value = 'create'
+      break
+  }
+  getProjectListApi().then((res) => {
+    projectList.value = res.data
+  })
+})
 </script>
 
 <template>
   <div class="top-bar bg-background-primary flex items-center justify-between">
     <div class="top-bar-left flex items-center gap-2 p-4">
-      <img src="@/assets/images/logo.png" class="w-10 h-10">
-      <div class="text-primary-100 font-bold text-xl">
+      <img src="@/assets/images/logo.png" class="w-10 h-10 cursor-pointer" @click="goToDashboard">
+      <div class="text-primary-100 font-bold text-xl cursor-pointer" @click="goToDashboard">
         LiFocus
       </div>
       <TSelect v-model="project" label="项目：" placeholder="请选择项目" auto-width clearable :borderless="true">

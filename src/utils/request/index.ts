@@ -2,6 +2,7 @@ import type { LFRequestConfig } from './type'
 import { useTdMessage } from '@/hooks/useTdMessage'
 import { getRefreshToken, getToken } from '../auth'
 
+import { getCurrentProjectId } from '../project'
 import LFRequest from './request'
 
 const useMessage = useTdMessage()
@@ -25,6 +26,9 @@ export const httpClient = new LFRequest({
       if (token && config.headers) {
         config.headers.Authorization = `Bearer ${token}`
       }
+      const projectId = getCurrentProjectId() || ''
+      if (projectId && config.headers)
+        config.headers['X-Project-Id'] = projectId
       if (!token) {
         useMessage.error('登录状态异常，请重新登录')
         window.location.href = '/auth/login'

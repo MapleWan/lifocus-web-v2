@@ -21,9 +21,9 @@ export type ICategoryResponse = IApiResponse<ICategory[]>;
 
 // 创建分类请求参数类型
 export interface ICreateCategoryRequest {
-  project_id: string;
   name: string;
-  parent_id?: number | null;
+  parent_id?: string | number | null;
+  category_full_path?: string | null;
   icon?: string | null;
   description?: string | null;
 }

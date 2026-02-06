@@ -1,10 +1,10 @@
 <script setup lang="tsx">
 import type { FormInstanceFunctions, FormRule } from 'tdesign-vue-next'
-import type { Reactive, VNode } from 'vue'
+import type { Reactive } from 'vue'
 import type { ILoginParams } from '@/types/loginTypes'
 import Cookies from 'js-cookie'
 import { Button as TButton, Checkbox as TCheckbox, Form as TForm, FormItem as TFormItem, Input as TInput } from 'tdesign-vue-next'
-import { h, reactive, ref } from 'vue'
+import { reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { loginApi } from '@/api/auth'
 // import { useCustomMessage } from '@/hooks/useCustomMessage'

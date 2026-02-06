@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import type { TreeNodeModel, TreeProps } from 'tdesign-vue-next'
+import type { IArticle } from '@/types/articleTypes'
 import { Button as TButton, Input as TInput, Popconfirm as TPopconfirm, Popup as TPopup, Tree as TTree } from 'tdesign-vue-next'
 import { onMounted, ref, watch } from 'vue'
+import { getArticleListApi } from '@/api/article'
 import { createCategoryApi, deleteCategoryApi, getCategoryListApi, updateCategoryApi } from '@/api/category'
 import AddIcon from '@/assets/svg/add.svg'
 import DeleteIcon from '@/assets/svg/delete.svg'
@@ -99,6 +101,7 @@ function handleNodeClick(data: any) {
     }
   }
 }
+
 onMounted(() => {
   getCategoryList()
 })
@@ -152,8 +155,21 @@ onMounted(() => {
         </template>
       </TTree>
     </div>
-    <div class="right flex-1 overflow-hidden flex flex-col">
-      <FileList />
+    <div class="right flex-1 p-4 p-t-0 overflow-hidden flex flex-col gap-4">
+      <div class="right-header flex items-center justify-between gap-2">
+        <div class="font-bold">
+          文章列表
+        </div>
+        <div>
+          <TButton theme="primary">
+            <template #icon>
+              <AddIcon class="w-4 h-4" />
+            </template>
+            添加
+          </TButton>
+        </div>
+      </div>
+      <FileList :current-node="currentNode" />
     </div>
   </div>
 </template>

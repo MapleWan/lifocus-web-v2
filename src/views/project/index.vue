@@ -1,24 +1,26 @@
 <script setup lang="ts">
 import type { TreeNodeModel, TreeProps } from 'tdesign-vue-next'
-import type { IArticle } from '@/types/articleTypes'
+import type { DNoteFormMode, IArticle } from '@/types/articleTypes'
+import type { ICategory } from '@/types/categoryTypes'
 import { Button as TButton, Input as TInput, Popconfirm as TPopconfirm, Popup as TPopup, Tree as TTree } from 'tdesign-vue-next'
 import { onMounted, ref, watch } from 'vue'
-import { getArticleListApi } from '@/api/article'
 import { createCategoryApi, deleteCategoryApi, getCategoryListApi, updateCategoryApi } from '@/api/category'
 import AddIcon from '@/assets/svg/add.svg'
 import DeleteIcon from '@/assets/svg/delete.svg'
 import EditIcon from '@/assets/svg/edit.svg'
 import { useTdMessage } from '@/hooks/useTdMessage'
 import { useMainStore } from '@/stores/main'
+import ArticleForm from './components/article-form.vue'
 import FileList from './components/file-list.vue'
 
 const mainStore = useMainStore()
 const tdMessage = useTdMessage()
 const categoryTreeData = ref<TreeProps['data']>([])
+const fileListRef = ref()
 
 const newNodeName = ref<string>('')
 const currentNodeName = ref<string>('')
-const currentNode = ref<TreeNodeModel | null>(null)
+const currentNode = ref<TreeNodeModel<ICategory> | undefined>(undefined)
 
 watch(() => mainStore.currentProjectId, () => {
   getCategoryList()
@@ -34,6 +36,7 @@ function getCategoryList() {
   })
 }
 
+// 添加节点
 function appendNode(node: TreeNodeModel) {
   if (!newNodeName.value) {
     tdMessage.error('请输入节点名称')
@@ -53,6 +56,8 @@ function appendNode(node: TreeNodeModel) {
     tdMessage.error(`添加失败`)
   })
 }
+
+// 编辑节点
 function editNode(node: TreeNodeModel) {
   if (!newNodeName.value) {
     tdMessage.error('请输入节点名称')
@@ -73,6 +78,7 @@ function editNode(node: TreeNodeModel) {
   })
 }
 
+// 删除节点
 function removeNode(node: TreeNodeModel) {
   deleteCategoryApi(String(node.value), node.data.full_path).then((res) => {
     if (res.code === 200) {
@@ -88,8 +94,9 @@ function removeNode(node: TreeNodeModel) {
   })
 }
 
+// 节点点击
 function handleNodeClick(data: any) {
-  const node = data.node as TreeNodeModel
+  const node = data.node
   if (node?.actived) {
     // 选中
     currentNode.value = node
@@ -97,18 +104,49 @@ function handleNodeClick(data: any) {
   else {
     // 取消选中
     if (currentNode.value?.value === node.value) {
-      currentNode.value = null
+      currentNode.value = undefined
     }
   }
 }
 
+// 笔记 添加 查看 编辑 弹窗逻辑
+const isShowCreateNoteDialog = ref(false)
+const articleFormMode = ref<DNoteFormMode>('add')
+const currentArticle = ref<IArticle | undefined>(undefined)
+
+// 处理文章点击
+function handleArticleClick(article: IArticle) {
+  currentArticle.value = article
+  articleFormMode.value = 'view'
+  isShowCreateNoteDialog.value = true
+}
+
+// 关闭弹窗
+function closeCreateNoteDialog(isNeedRefresh: boolean = false) {
+  // currentArticle.value = undefined
+  isShowCreateNoteDialog.value = false
+  if (isNeedRefresh) {
+    if (fileListRef.value)
+      fileListRef.value.refresh()
+  }
+}
+
+function addArticle() {
+  if (!currentNode.value || currentNode.value.value === -1)
+    return tdMessage.warning('请先选中一个非<全部>的目录')
+  currentArticle.value = undefined
+  articleFormMode.value = 'add'
+  isShowCreateNoteDialog.value = true
+}
+
 onMounted(() => {
+  // 获取分类列表
   getCategoryList()
 })
 </script>
 
 <template>
-  <div class="flex gap-2 h-full overflow-hidden">
+  <div class="flex gap-2 h-full overflow-hidden relative">
     <div class="left w-64 p-r-4 border-r-1 border-r-dashed border-r-solid border-primary-10">
       <TTree :data="categoryTreeData" :keys="{ label: 'name', value: 'id' }" activable hover transition :expand-level="1" @click="handleNodeClick">
         <template #label="{ node }">
@@ -161,7 +199,7 @@ onMounted(() => {
           文章列表
         </div>
         <div>
-          <TButton theme="primary">
+          <TButton theme="primary" @click="addArticle">
             <template #icon>
               <AddIcon class="w-4 h-4" />
             </template>
@@ -169,8 +207,17 @@ onMounted(() => {
           </TButton>
         </div>
       </div>
-      <FileList :current-node="currentNode" />
+      <FileList ref="fileListRef" :current-node="currentNode" @article-click="handleArticleClick" />
     </div>
+
+    <transition
+      enter-active-class="duration-300 ease-out" enter-from-class="opacity-0 translate-x-5"
+      leave-active-class="duration-300 ease-in" leave-to-class="opacity-0 translate-x-5"
+    >
+      <ArticleForm
+        v-show="isShowCreateNoteDialog" class="absolute left-0 top-0 bg-background-secondary z-5 w-full h-full overflow-hidden" :mode="articleFormMode" :current-node="currentNode" :article-info="currentArticle" @close="closeCreateNoteDialog"
+      />
+    </transition>
   </div>
 </template>
 

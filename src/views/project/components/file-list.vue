@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import type { TreeNodeModel } from 'tdesign-vue-next'
 import type { IArticle, IArticleFilter } from '@/types/articleTypes'
+import type { ICategory } from '@/types/categoryTypes'
 import { useInfiniteScroll } from '@vueuse/core'
 import dayjs from 'dayjs'
-import { Card as TCard, Tag as TTag } from 'tdesign-vue-next'
 
+import { Card as TCard, Tag as TTag } from 'tdesign-vue-next'
 import { computed, onMounted, ref, watch } from 'vue'
 import { getArticleListApi } from '@/api/article'
 import DeleteIcon from '@/assets/svg/delete.svg'
@@ -12,29 +13,36 @@ import EditIcon from '@/assets/svg/edit.svg'
 import { EArticleStatus, EArticleType } from '@/utils/enums/articleEnum'
 
 const props = defineProps<{
-  currentNode: TreeNodeModel | null
+  currentNode: TreeNodeModel<ICategory> | undefined
 }>()
+
+const emits = defineEmits(['articleClick'])
 
 const fileListRef = ref<HTMLElement | null>()
 
+// 文章类型值转文本
 const articleTypeValueToText = EArticleType.reduce((acc, cur) => {
   acc[cur.value] = cur.label
   return acc
 }, {} as Record<string, string>)
 
+// 文章状态值转文本
 const articleStatusValueToText = EArticleStatus.reduce((acc, cur) => {
   acc[cur.value] = cur.label
   return acc
 }, {} as Record<string, string>)
 
-const articleList = ref<IArticle[]>([])
-const currentPageNo = ref<number>(1)
-const currentPageSize = ref<number>(10)
-const currentTotal = ref<number>(0)
+const articleList = ref<IArticle[]>([]) // 文章列表
+const currentPageNo = ref<number>(1) // 当前页码
+const currentPageSize = ref<number>(10) // 每页大小
+const currentTotal = ref<number>(0) // 总数
 
+// 是否有更多内容
 const hasMore = computed(() => {
   return currentPageNo.value * currentPageSize.value < currentTotal.value
 })
+
+// 获取文章列表(分页)
 function getArticleList() {
   const params: IArticleFilter = {
     page_no: currentPageNo.value,
@@ -51,24 +59,24 @@ function getArticleList() {
   })
 }
 
-watch(() => props.currentNode, () => {
-  console.log(props.currentNode, 'currentNode')
+function refresh() {
   articleList.value = []
   currentPageNo.value = 1
   currentPageSize.value = 10
   currentTotal.value = 0
   getArticleList()
+}
+
+// 监听当前节点变化，重新获取文章列表
+watch(() => props.currentNode, () => {
+  refresh()
 })
 
-watch(hasMore, (newValue) => {
-  console.log('hasMore', newValue)
-})
-
+// 监听滚动加载更多
 useInfiniteScroll(
   fileListRef,
   () => {
     // load more
-    console.log('load more')
     getArticleList()
   },
   {
@@ -81,6 +89,15 @@ useInfiniteScroll(
   },
 )
 
+// 处理文章点击
+function handleArticleClick(article: IArticle) {
+  emits('articleClick', article)
+}
+
+defineExpose({
+  refresh,
+})
+
 onMounted(() => {
   getArticleList()
 })
@@ -90,7 +107,7 @@ onMounted(() => {
   <div ref="fileListRef" class="p-t-1 h-full overflow-auto custom-scrollbar">
     <div class="file-list">
       <template v-for="article in articleList" :key="article.id">
-        <TCard :title="article.title" hover-shadow class="cursor-pointer">
+        <TCard :title="article.title" hover-shadow class="cursor-pointer" @click="handleArticleClick(article)">
           <template #actions>
             <div class="flex items-center gap-2">
               <EditIcon class="c-primary-100 w-4 h-4 cursor-pointer hover:text-primary-50" />

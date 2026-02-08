@@ -26,8 +26,7 @@ trigger: always_on
     - Always use the Vue Composition API script setup style.
   
     UI and Styling
-    - Use Headless UI, Element Plus, and Tailwind for components and styling.
-    - Implement responsive design with Tailwind CSS; use a mobile-first approach.
+    - Use Headless UI, Element Plus, and UnoCss for components and styling.
   
     Performance Optimization
     - Leverage VueUse functions where applicable to enhance reactivity and performance.

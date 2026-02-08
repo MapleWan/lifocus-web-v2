@@ -4,6 +4,8 @@ export type TArticleStatus = 'ACTIVE' | 'ARCHIVED'
 
 export type TArticleType = 'NOTE' | 'DAILY'
 
+export type DNoteFormMode = 'add' | 'edit' | 'view'
+
 export interface IArticle {
   id: string
   category_id: string
@@ -15,6 +17,15 @@ export interface IArticle {
   is_deleted: boolean
   create_time: string
   update_time: string
+}
+
+export interface IAddArticleParams {
+  category_id: string
+  category_full_path: string
+  type: TArticleType
+  title: string
+  status?: TArticleStatus
+  content: string
 }
 
 export type TArticleResponse = IApiResponse<IArticle[]>

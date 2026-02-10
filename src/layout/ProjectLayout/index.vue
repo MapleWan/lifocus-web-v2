@@ -80,7 +80,7 @@ onMounted(() => {
         <div class="text-primary-100 font-bold text-xl cursor-pointer" @click="goToDashboard">
           LiFocus
         </div>
-        <TSelect v-model="project" label="项目：" placeholder="请选择项目" auto-width clearable :borderless="true">
+        <TSelect v-model="project" label="项目：" placeholder="请选择项目" auto-width filterable :borderless="true">
           <TOption v-for="item in projectList" :key="item.id" :value="item.id" :label="item.name" />
         </TSelect>
       </div>

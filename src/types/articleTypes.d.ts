@@ -56,4 +56,6 @@ export interface IArticleFilter {
   update_end_time?: string
   create_start_time?: string
   create_end_time?: string
+  order_by?: keyof IArticle
+  order_direction?: 'asc' | 'desc'
 }

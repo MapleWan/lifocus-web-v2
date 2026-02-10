@@ -3,7 +3,7 @@ import type { IAddArticleParams, IArticle, IArticleFilter, TArticlePageResponse 
 import { httpClient } from '@/utils/request'
 
 /**
- * 获取项目某一目录下的文章列表
+ * 获取项目某一目录下的文章列表【分页】
  */
 export function getArticleListApi(data: IArticleFilter) {
   return httpClient.post<TArticlePageResponse>({

@@ -5,7 +5,7 @@ import type { ICategory } from '@/types/categoryTypes'
 import { useInfiniteScroll } from '@vueuse/core'
 import dayjs from 'dayjs'
 
-import { Card as TCard, Popconfirm as TPopconfirm, Skeleton as TSkeleton, Tag as TTag } from 'tdesign-vue-next'
+import { Popconfirm as TPopconfirm, Skeleton as TSkeleton, Tag as TTag } from 'tdesign-vue-next'
 import { computed, onMounted, ref, watch } from 'vue'
 import { deleteArticleApi, getArticleListApi } from '@/api/article'
 import DeleteIcon from '@/assets/svg/delete.svg'
@@ -49,7 +49,11 @@ const hasMore = computed(() => {
 const isLoading = ref<boolean>(false) // 是否正在加载
 
 // 获取文章列表(分页)
-function getArticleList() {
+function getArticleList(searchParams: {
+  title?: string
+  order_by?: keyof IArticle
+  order_direction?: 'asc' | 'desc'
+} = undefined) {
   if (isLoading.value)
     return
   isLoading.value = true
@@ -60,7 +64,7 @@ function getArticleList() {
   if (props?.currentNode?.value) {
     params.category_id = props.currentNode.value
   }
-  getArticleListApi(params).then((res) => {
+  getArticleListApi({ ...params, ...searchParams }).then((res) => {
     currentPageNo.value = res?.data?.page_no + 1
     currentPageSize.value = res?.data?.page_size || 2
     currentTotal.value = res?.data?.total || 0
@@ -78,9 +82,20 @@ function refresh() {
   getArticleList()
 }
 
+function search(searchParams: {
+  title?: string
+  order_by?: keyof IArticle
+  order_direction?: 'asc' | 'desc'
+}) {
+  articleList.value = []
+  currentPageNo.value = 1
+  currentPageSize.value = 10
+  currentTotal.value = 0
+  getArticleList(searchParams)
+}
+
 // 监听当前节点变化，重新获取文章列表
 watch(() => props.currentNode, () => {
-  console.log(props.currentNode, '------------')
   refresh()
 })
 
@@ -129,6 +144,7 @@ function deleteArticle(article: IArticle) {
 
 defineExpose({
   refresh,
+  search,
 })
 
 onMounted(() => {

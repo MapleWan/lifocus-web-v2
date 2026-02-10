@@ -11,7 +11,16 @@ export interface IProjectInfo {
   update_time: string,
 }
 
+export interface IAddProjectParams {
+  name: string,
+  description: string,
+  type: string,
+  status: string,
+}
+
 export type TProjectList = Array<IProjectInfo>
 
 export type TProjectResult = IApiResponse<TProjectList>
+
+export type TAddProjectResult = IApiResponse<IProjectInfo>
 

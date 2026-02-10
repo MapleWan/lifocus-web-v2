@@ -1,13 +1,16 @@
 <script setup lang="ts">
-import type { TreeNodeModel, TreeProps } from 'tdesign-vue-next'
+import type { DropdownProps, TreeNodeModel, TreeProps } from 'tdesign-vue-next'
 import type { DNoteFormMode, IArticle } from '@/types/articleTypes'
 import type { ICategory, ICreateCategoryRequest } from '@/types/categoryTypes'
-import { Button as TButton, Input as TInput, Popconfirm as TPopconfirm, Popup as TPopup, Tree as TTree } from 'tdesign-vue-next'
-import { nextTick, onMounted, ref, watch } from 'vue'
+import { Button as TButton, Dropdown as TDropdown, DropdownItem as TDropdownItem, Input as TInput, Popconfirm as TPopconfirm, Popup as TPopup, Tree as TTree } from 'tdesign-vue-next'
+import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import { createCategoryApi, deleteCategoryApi, getCategoryListApi, updateCategoryApi } from '@/api/category'
+
 import AddIcon from '@/assets/svg/add.svg'
 import DeleteIcon from '@/assets/svg/delete.svg'
 import EditIcon from '@/assets/svg/edit.svg'
+import SearchIcon from '@/assets/svg/search.svg'
+import SortIcon from '@/assets/svg/sort.svg'
 import { useTdMessage } from '@/hooks/useTdMessage'
 import { useMainStore } from '@/stores/main'
 import ArticleForm from './components/article-form.vue'
@@ -23,7 +26,19 @@ const currentNodeName = ref<string>('')
 const currentNode = ref<TreeNodeModel<ICategory> | undefined>(undefined)
 const treeActivedValue = ref()
 const treeRef = ref()
+const sortField = ref<keyof IArticle>('update_time')
+const sortDirection = ref<'asc' | 'desc'>('desc')
+const sortTips = computed(() => {
+  const sortFieldToValue = {
+    create_time: '创建时间',
+    update_time: '更新时间',
+    title: '文章标题',
+  }
+  return `${sortFieldToValue[sortField.value]} ${sortDirection.value === 'asc' ? '⬆' : '⬇'}`
+})
+
 watch(() => mainStore.currentProjectId, () => {
+  currentNode.value = undefined
   getCategoryList()
 })
 
@@ -130,16 +145,6 @@ function viewArticle(article: IArticle) {
   isShowCreateNoteDialog.value = true
 }
 
-// 关闭弹窗
-function closeCreateNoteDialog(isNeedRefresh: boolean = false) {
-  currentArticle.value = undefined
-  isShowCreateNoteDialog.value = false
-  if (isNeedRefresh) {
-    if (fileListRef.value)
-      fileListRef.value.refresh()
-  }
-}
-
 // 添加文章
 function addArticle() {
   if (!currentNode.value || currentNode.value.value === -1)
@@ -154,6 +159,36 @@ function editArticle(article: IArticle) {
   currentArticle.value = article
   articleFormMode.value = 'edit'
   isShowCreateNoteDialog.value = true
+}
+
+// 排序
+const changeSort: DropdownProps['onClick'] = (data) => {
+  const [orderBy, orderDirection] = typeof data?.value === 'string' ? data?.value?.split('-') : []
+  sortField.value = orderBy as keyof IArticle
+  sortDirection.value = orderDirection as 'asc' | 'desc'
+  search()
+}
+
+// 搜索标题关键字
+const searchTitle = ref('')
+// 搜索
+function search() {
+  fileListRef.value.search({
+    title: searchTitle.value,
+    order_by: sortField.value,
+    order_direction: sortDirection.value,
+  })
+}
+
+// 关闭弹窗
+function closeCreateNoteDialog(isNeedRefresh: boolean = false) {
+  currentArticle.value = undefined
+  isShowCreateNoteDialog.value = false
+  searchTitle.value = ''
+  if (isNeedRefresh) {
+    if (fileListRef.value)
+      fileListRef.value.refresh()
+  }
 }
 
 onMounted(() => {
@@ -238,9 +273,46 @@ onMounted(() => {
     </div>
     <div class="right flex-1 p-4 p-t-0 overflow-hidden flex flex-col gap-4">
       <template v-if="currentNode">
-        <div class="right-header flex items-center justify-between gap-2">
-          <div class="font-bold">
-            文章列表
+        <div class="right-header flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <div class="font-bold">
+              文章列表
+            </div>
+            <div class="flex items-center gap-2">
+              <TDropdown trigger="click" @click="changeSort">
+                <div class="cursor-pointer flex items-center gap-2 c-gray-500">
+                  <SortIcon class="w-4 h-4 hover:text-primary-50" />
+                  <div class="text-sm text-gray-500 w-20">
+                    {{ sortTips }}
+                  </div>
+                </div>
+                <template #dropdown>
+                  <TDropdownItem value="update_time-desc" divider>
+                    更新时间⬇
+                  </TDropdownItem>
+                  <TDropdownItem value="update_time-asc" divider>
+                    更新时间⬆
+                  </TDropdownItem>
+                  <TDropdownItem value="create_time-desc" divider>
+                    创建时间⬇
+                  </TDropdownItem>
+                  <TDropdownItem value="create_time-asc" divider>
+                    创建时间⬆
+                  </TDropdownItem>
+                  <TDropdownItem value="title-desc" divider>
+                    文章标题⬇
+                  </TDropdownItem>
+                  <TDropdownItem value="title-asc" divider>
+                    文章标题⬆
+                  </TDropdownItem>
+                </template>
+              </TDropdown>
+              <TInput v-model="searchTitle" placeholder="标题搜索, 按回车键搜索" clearable size="small" @enter="search">
+                <template #suffixIcon>
+                  <SearchIcon class="w-4 h-4 cursor-pointer c-gray-400" />
+                </template>
+              </TInput>
+            </div>
           </div>
           <div>
             <TButton theme="primary" @click="addArticle">

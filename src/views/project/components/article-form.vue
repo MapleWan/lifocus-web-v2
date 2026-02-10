@@ -3,11 +3,13 @@ import type { TreeNodeModel } from 'tdesign-vue-next'
 import type { PropType } from 'vue'
 import type { DNoteFormMode, IArticle } from '@/types/articleTypes'
 import type { ICategory } from '@/types/categoryTypes'
+import _ from 'lodash'
 import { Button as TButton, Input as TInput, Option as TOption, Select as TSelect, Tag as TTag } from 'tdesign-vue-next'
-import { computed, ref, watch } from 'vue'
-import { createArticleApi, getArticleByIdApi } from '@/api/article'
+import { computed, ref, watch, watchEffect } from 'vue'
+import { createArticleApi, getArticleByIdApi, updateArticleApi } from '@/api/article'
 import DoubleLeft from '@/assets/svg/doubleLeft.svg'
 import Editor from '@/components/Editor/index.vue'
+
 import { useTdMessage } from '@/hooks/useTdMessage'
 import { EArticleStatus, EArticleType } from '@/utils/enums/articleEnum'
 
@@ -53,15 +55,24 @@ const tdMessage = useTdMessage()
 const isPreview = computed(() => props.mode === 'view')
 const article = ref<Partial<IArticle>>(props.articleInfo)
 const savingLoading = ref(false)
-watch(() => props.articleInfo, (articleInfo) => {
-  article.value = { ...articleInfo }
+const isLoading = ref(false)
 
-  if (article.value?.id && !article.value.content) {
-    getArticleByIdApi(article.value.id).then((res) => {
-      if (res.code === 200) {
-        article.value = res.data
-      }
-    })
+// 节流根据文章 id 获取文章详情
+const getArticleByIdDebounce = _.debounce(() => {
+  isLoading.value = true
+  getArticleByIdApi(props.articleInfo.id).then((res) => {
+    if (res.code === 200) {
+      article.value = res.data
+    }
+  }).catch((error: any) => {
+    console.error(error)
+  }).finally(() => {
+    isLoading.value = false
+  })
+}, 100)
+watchEffect(() => {
+  if (props.mode !== 'add' && props.articleInfo.id && !props.articleInfo.content) {
+    getArticleByIdDebounce()
   }
 })
 
@@ -73,10 +84,12 @@ function resetArticle() {
   }
 }
 
-function close(isNeedRefresh: boolean = false) {
+const isRefresh = ref(false) // 关闭时是否需要刷新
+
+function close() {
   if (props.mode !== 'add')
     resetArticle()
-  emits('close', isNeedRefresh)
+  emits('close', isRefresh.value)
 }
 
 function saveArticle() {
@@ -84,30 +97,51 @@ function saveArticle() {
     return tdMessage.warning('请输入标题')
   if (!article.value.content)
     return tdMessage.warning('请输入内容')
-  createArticleApi({
-    category_id: props.currentNode?.value ? String(props.currentNode.value) : '',
-    category_full_path: String(props.currentNode.data.full_path),
-    type: article.value?.type || 'NOTE',
-    status: 'ACTIVE',
-    title: article.value.title,
-    content: article.value.content,
-  }).then((res) => {
-    if (res.code === 200) {
-      tdMessage.success('保存成功')
-      resetArticle()
-      close(true)
-    }
-  }).catch((error: any) => {
-    console.error(error)
-    tdMessage.error('保存失败')
-  })
+  if (article.value.id) {
+    updateArticleApi(article.value.id, {
+      category_id: props.currentNode?.value ? String(props.currentNode.value) : '',
+      category_full_path: String(props.currentNode.data.full_path),
+      type: article.value?.type,
+      status: 'ACTIVE',
+      title: article.value.title,
+      content: article.value.content,
+    }).then((res) => {
+      if (res.code === 200) {
+        tdMessage.success('保存成功')
+        isRefresh.value = true
+      }
+    }).catch((error: any) => {
+      console.error(error)
+      tdMessage.error(error?.message || '保存失败')
+    })
+  }
+  else {
+    createArticleApi({
+      category_id: props.currentNode?.value ? String(props.currentNode.value) : '',
+      category_full_path: String(props.currentNode.data.full_path),
+      type: article.value?.type || 'NOTE',
+      status: 'ACTIVE',
+      title: article.value.title,
+      content: article.value.content,
+    }).then((res) => {
+      if (res.code === 200) {
+        tdMessage.success('保存成功')
+        isRefresh.value = true
+        resetArticle()
+        close()
+      }
+    }).catch((error: any) => {
+      console.error(error)
+      tdMessage.error(error?.message || '保存失败')
+    })
+  }
 }
 </script>
 
 <template>
   <div class="p-4 flex flex-col h-full overflow-hidden items-center">
     <div class="head-bar flex justify-between items-center overflow-hidden" :class="isPreview ? 'w-80%' : 'w-full'">
-      <div v-show="isShowBack" class="left cursor-pointer flex items-center hover:c-font-hover" @click="close(false)">
+      <div v-show="isShowBack" class="left cursor-pointer flex items-center hover:c-font-hover" @click="close">
         <DoubleLeft class="w-6 h-6" />
         <span>工作台</span>
       </div>
@@ -145,9 +179,19 @@ function saveArticle() {
         :editor-config="{ disabled: savingLoading && isPreview }"
       />
     </ScrollBar> -->
-
+    <div v-if="isLoading" class="flex-1 m-t-4 rounded-xl w-80% bg-background-white">
+      <div class="flex items-center justify-center w-full h-full ">
+        <div class="flex items-center gap-2 text-primary-50 text-sm">
+          <div class="w-2 h-2 rounded-full bg-primary-50 animate-bounce" />
+          <div class="w-2 h-2 rounded-full bg-primary-50 animate-bounce" style="animation-delay: 0.2s" />
+          <div class="w-2 h-2 rounded-full bg-primary-50 animate-bounce" style="animation-delay: 0.4s" />
+          <span>内容加载中...</span>
+        </div>
+      </div>
+    </div>
     <Editor
-      v-model="article.content" :is-preview="isPreview" class="flex-1 m-t-4 p-4 rounded-xl"
+      v-else
+      v-model="article.content" :is-preview="isPreview" class="flex-1 m-t-4 p-x-6 p-y-4 rounded-xl"
       :editor-config="{ disabled: savingLoading && isPreview }"
     />
   </div>

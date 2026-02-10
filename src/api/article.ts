@@ -32,3 +32,28 @@ export function createArticleApi(data: IAddArticleParams) {
     data,
   })
 }
+
+/**
+ * 更新文章
+ * @param id
+ * @param data
+ */
+export function updateArticleApi(id: string, data: Partial<IArticle> & { category_full_path: string }) {
+  return httpClient.put<IApiResponse<IArticle>>({
+    url: `/article/${id}`,
+    data,
+  })
+}
+
+/**
+ * 删除文章
+ * @param id
+ */
+export function deleteArticleApi(id: string, data: {
+  category_full_path: string
+}) {
+  return httpClient.delete<IApiResponse<IArticle>>({
+    url: `/article/${id}`,
+    data,
+  })
+}

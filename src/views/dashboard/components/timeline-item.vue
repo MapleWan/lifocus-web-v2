@@ -107,7 +107,7 @@ function handleFinishAction() {
     <!-- 悬停蒙版和操作按钮 -->
     <div
       v-if="timeline.status !== 'FINISHED'"
-      class="absolute inset-0 bg-black bg-opacity-60 rounded-lg flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+      class="absolute inset-0 bg-black bg-opacity-60 rounded-lg flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
       :class="{
         'justify-start pl-4': Number(index) % 2 === 0,
         'justify-end pr-4': Number(index) % 2 !== 0,

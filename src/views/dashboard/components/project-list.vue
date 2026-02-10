@@ -178,7 +178,7 @@ function openProject(projectId: string) {
 <style scoped lang="scss">
 .project-container-content {
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  grid-auto-rows: 200px;
+  grid-auto-rows: 160px;
   gap: 16px;
 }
 </style>

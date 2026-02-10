@@ -1,9 +1,12 @@
 <script setup lang="ts">
 import type { IProjectInfo } from '@/types/projectTypes'
 import dayjs from 'dayjs'
+import { Tag as TTag } from 'tdesign-vue-next'
 import { onMounted } from 'vue'
 import ProjectIcon from '@/assets/svg/project.svg'
+import { EProjectStatus } from '@/utils/enums/projectEnum'
 
+defineProps<{ projectInfo: IProjectInfo }>()
 // defineProps<{ projectInfo: IProjectInfo }>({
 //   projectInfo: {
 //     type: Object,
@@ -11,8 +14,11 @@ import ProjectIcon from '@/assets/svg/project.svg'
 //   },
 // })
 
-defineProps<{ projectInfo: IProjectInfo }>()
-
+// 项目状态值转文本
+const projectStatusValueToText = EProjectStatus.reduce((acc, cur) => {
+  acc[cur.value] = cur.label
+  return acc
+}, {} as Record<string, string>)
 onMounted(() => {
 })
 </script>
@@ -39,8 +45,11 @@ onMounted(() => {
         </ScrollBar>
       </div>
 
-      <div class="time text-sm text-primary-40 text-right m-t-2">
-        {{ dayjs(projectInfo.update_time).format('YYYY-MM-DD HH:mm:ss') }}
+      <div class="time text-sm text-primary-40 text-right m-t-2 flex justify-between">
+        <TTag variant="light" :theme="projectInfo.status === 'ACTIVE' ? 'success' : 'primary'">
+          {{ projectStatusValueToText[projectInfo.status] }}
+        </TTag>
+        <span class="ml-2">{{ dayjs(projectInfo.update_time).format('YYYY-MM-DD HH:mm:ss') }}</span>
       </div>
     </div>
   </div>

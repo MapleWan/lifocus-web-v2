@@ -17,6 +17,10 @@ export interface IArticle {
   is_deleted: boolean
   create_time: string
   update_time: string
+  category: {
+    id: string,
+    name: string,
+  }
 }
 
 export interface IAddArticleParams {

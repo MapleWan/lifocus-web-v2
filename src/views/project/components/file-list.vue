@@ -159,8 +159,11 @@ onMounted(() => {
                   {{ articleStatusValueToText[article.status] }}
                 </TTag>
               </div>
-              <div class="text-sm text-gray-500">
-                {{ dayjs(article.update_time).format('YY-MM-DD HH:mm:ss') }}
+              <div class="text-sm text-gray-500 text-overflow m-x-2" :title="article.category.name">
+                {{ article.category.name }}
+              </div>
+              <div class="text-sm text-gray-500 text-overflow" :title="dayjs(article.update_time).format('YY-MM-DD HH:mm')">
+                {{ dayjs(article.update_time).format('YY-MM-DD HH:mm') }}
               </div>
             </div>
           </CustomCard>

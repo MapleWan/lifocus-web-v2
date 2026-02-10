@@ -28,10 +28,10 @@ function changeProjectTabType(type: 'active' | 'archived') {
 
 const listType: Ref<'card' | 'list'> = ref('card')
 
-const sortField = ref<keyof IProjectInfo>('update_time')
+const sortField = ref<'create_time' | 'update_time' | 'name'>('update_time')
 const sortDirection = ref<'asc' | 'desc'>('desc')
 const sortTips = computed(() => {
-  const sortFieldToValue = {
+  const sortFieldToValue: Record<'create_time' | 'update_time' | 'name', string> = {
     create_time: '创建时间',
     update_time: '更新时间',
     name: '项目名称',
@@ -40,7 +40,7 @@ const sortTips = computed(() => {
 })
 const changeSort: DropdownProps['onClick'] = (data) => {
   const [orderBy, orderDirection] = typeof data?.value === 'string' ? data?.value?.split('-') : []
-  sortField.value = orderBy as keyof IProjectInfo
+  sortField.value = orderBy as 'create_time' | 'update_time' | 'name'
   sortDirection.value = orderDirection as 'asc' | 'desc'
   getProjectList()
 }
@@ -85,7 +85,7 @@ const tableColumns = ref<TableProps['columns']>([
 ])
 const sortChange: TableProps['onSortChange'] = (sortVal, _) => {
   if (!Array.isArray(sortVal)) {
-    sortField.value = sortVal.sortBy as keyof IProjectInfo
+    sortField.value = sortVal.sortBy as 'create_time' | 'update_time' | 'name'
     sortDirection.value = sortVal.descending ? 'desc' : 'asc'
     getProjectList()
   }

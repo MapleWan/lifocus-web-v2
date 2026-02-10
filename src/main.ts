@@ -5,6 +5,8 @@ import simplebar from 'simplebar-vue'
 import { createApp } from 'vue'
 import App from './App.vue'
 import router from './router'
+// 引入tdesign-vue-next组件库的少量全局样式变量
+import 'tdesign-vue-next/es/style/index.css'
 import 'virtual:uno.css'
 import './style/index.css'
 import '@unocss/reset/sanitize/sanitize.css'

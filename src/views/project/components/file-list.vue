@@ -53,7 +53,11 @@ function getArticleList(searchParams: {
   title?: string
   order_by?: keyof IArticle
   order_direction?: 'asc' | 'desc'
-} = undefined) {
+} = {
+  title: '',
+  order_by: 'update_time',
+  order_direction: 'desc',
+}) {
   if (isLoading.value)
     return
   isLoading.value = true

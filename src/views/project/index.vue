@@ -26,10 +26,10 @@ const currentNodeName = ref<string>('')
 const currentNode = ref<TreeNodeModel<ICategory> | undefined>(undefined)
 const treeActivedValue = ref()
 const treeRef = ref()
-const sortField = ref<keyof IArticle>('update_time')
+const sortField = ref<'create_time' | 'update_time' | 'title'>('update_time')
 const sortDirection = ref<'asc' | 'desc'>('desc')
 const sortTips = computed(() => {
-  const sortFieldToValue = {
+  const sortFieldToValue: Record<'create_time' | 'update_time' | 'title', string> = {
     create_time: '创建时间',
     update_time: '更新时间',
     title: '文章标题',
@@ -98,7 +98,7 @@ function appendNode(node: TreeNodeModel) {
 
 // 编辑节点
 function editNode(node: TreeNodeModel) {
-  if (!newNodeName.value) {
+  if (!currentNodeName.value) {
     tdMessage.error('请输入节点名称')
     return
   }
@@ -164,7 +164,7 @@ function editArticle(article: IArticle) {
 // 排序
 const changeSort: DropdownProps['onClick'] = (data) => {
   const [orderBy, orderDirection] = typeof data?.value === 'string' ? data?.value?.split('-') : []
-  sortField.value = orderBy as keyof IArticle
+  sortField.value = orderBy as 'create_time' | 'update_time' | 'title'
   sortDirection.value = orderDirection as 'asc' | 'desc'
   search()
 }
@@ -200,50 +200,73 @@ onMounted(() => {
 <template>
   <div class="flex gap-2 h-full overflow-hidden relative">
     <div class="left w-64 p-r-4 border-r-1 border-r-dashed border-r-solid border-primary-10">
-      <TTree v-if="categoryTreeData && categoryTreeData.length" ref="treeRef" v-model:actived="treeActivedValue" :data="categoryTreeData" :keys="{ label: 'name', value: 'id' }" activable hover transition :expand-level="1">
-        <template #label="{ node }">
-          {{ node.label }}
-        </template>
-        <template #operations="{ node }">
-          <div class="flex items-center m-l-1 gap-1 hover:opacity-100 transition-opacity group-hover:opacity-100">
-            <TPopup v-if="node.value !== -1" trigger="click">
-              <EditIcon class="c-primary-100 w-4 h-4 cursor-pointer hover:text-primary-50" @click="currentNodeName = node.label" />
-              <template #content>
-                <div class="p-2 flex flex-col gap-2">
-                  <div class="font-bold">
-                    编辑子节点
+      <div v-if="categoryTreeData && categoryTreeData.length" class="flex flex-col gap-2 justify-between">
+        <TPopup trigger="click">
+          <TButton theme="primary" variant="dashed" size="small">
+            <template #icon>
+              <AddIcon class="w-4 h-4" />
+            </template>
+            添加根节点
+          </TButton>
+          <template #content>
+            <div class="p-2 flex flex-col gap-2">
+              <div class="font-bold">
+                添加子节点
+              </div>
+              <div class="flex gap-2">
+                <TInput v-model="newNodeName" placeholder="节点名称" autofocus @enter="addFirstCategory" />
+                <TButton @click="addFirstCategory">
+                  添加
+                </TButton>
+              </div>
+            </div>
+          </template>
+        </TPopup>
+        <TTree ref="treeRef" v-model:actived="treeActivedValue" :data="categoryTreeData" :keys="{ label: 'name', value: 'id' }" activable hover transition :expand-level="1">
+          <template #label="{ node }">
+            {{ node.label }}
+          </template>
+          <template #operations="{ node }">
+            <div class="flex items-center m-l-1 gap-1 hover:opacity-100 transition-opacity group-hover:opacity-100">
+              <TPopup v-if="node.value !== -1" trigger="click">
+                <EditIcon class="c-primary-100 w-4 h-4 cursor-pointer hover:text-primary-50" @click="currentNodeName = node.label" />
+                <template #content>
+                  <div class="p-2 flex flex-col gap-2">
+                    <div class="font-bold">
+                      编辑子节点
+                    </div>
+                    <div class="flex gap-2">
+                      <TInput v-model="currentNodeName" placeholder="节点名称" autofocus @enter="editNode(node)" />
+                      <TButton @click="editNode(node)">
+                        确定
+                      </TButton>
+                    </div>
                   </div>
-                  <div class="flex gap-2">
-                    <TInput v-model="currentNodeName" placeholder="节点名称" autofocus @enter="editNode(node)" />
-                    <TButton @click="editNode(node)">
-                      确定
-                    </TButton>
+                </template>
+              </TPopup>
+              <TPopup trigger="click">
+                <AddIcon class="c-primary-100 w-4 h-4 cursor-pointer hover:text-primary-50" />
+                <template #content>
+                  <div class="p-2 flex flex-col gap-2">
+                    <div class="font-bold">
+                      添加子节点
+                    </div>
+                    <div class="flex gap-2">
+                      <TInput v-model="newNodeName" placeholder="节点名称" autofocus @enter="appendNode(node)" />
+                      <TButton @click="appendNode(node)">
+                        添加
+                      </TButton>
+                    </div>
                   </div>
-                </div>
-              </template>
-            </TPopup>
-            <TPopup trigger="click">
-              <AddIcon class="c-primary-100 w-4 h-4 cursor-pointer hover:text-primary-50" />
-              <template #content>
-                <div class="p-2 flex flex-col gap-2">
-                  <div class="font-bold">
-                    添加子节点
-                  </div>
-                  <div class="flex gap-2">
-                    <TInput v-model="newNodeName" placeholder="节点名称" autofocus @enter="appendNode(node)" />
-                    <TButton @click="appendNode(node)">
-                      添加
-                    </TButton>
-                  </div>
-                </div>
-              </template>
-            </TPopup>
-            <TPopconfirm v-if="node.value !== -1" content="确认删除节点?" @confirm="removeNode(node)">
-              <DeleteIcon class="c-primary-100 w-3 h-3 cursor-pointer hover:text-primary-50" />
-            </TPopconfirm>
-          </div>
-        </template>
-      </TTree>
+                </template>
+              </TPopup>
+              <TPopconfirm v-if="node.value !== -1" content="确认删除节点?" @confirm="removeNode(node)">
+                <DeleteIcon class="c-primary-100 w-3 h-3 cursor-pointer hover:text-primary-50" />
+              </TPopconfirm>
+            </div>
+          </template>
+        </TTree>
+      </div>
       <div v-else class="flex flex-col items-center gap-2">
         <div class="text-center text-primary-30 text-sm">
           暂无分类，请先添加

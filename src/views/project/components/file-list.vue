@@ -2,13 +2,14 @@
 import type { TreeNodeModel } from 'tdesign-vue-next'
 import type { IArticle, IArticleFilter } from '@/types/articleTypes'
 import type { ICategory } from '@/types/categoryTypes'
-import { useInfiniteScroll } from '@vueuse/core'
+import { useClipboard, useInfiniteScroll } from '@vueuse/core'
 import dayjs from 'dayjs'
 
 import { Input as TInput, Popconfirm as TPopconfirm, Popup as TPopup, Skeleton as TSkeleton, Tag as TTag } from 'tdesign-vue-next'
 import { computed, onMounted, ref, watch } from 'vue'
 import { deleteArticleApi, getArticleListApi, updateArticleApi } from '@/api/article'
 import CancelShare from '@/assets/svg/cancelShare.svg'
+import CopyIcon from '@/assets/svg/copy.svg'
 import DeleteIcon from '@/assets/svg/delete.svg'
 import EditIcon from '@/assets/svg/edit.svg'
 import ShareIcon from '@/assets/svg/share.svg'
@@ -23,6 +24,8 @@ const props = defineProps<{
 const emits = defineEmits(['viewArticle', 'editArticle'])
 
 const tdMessage = useTdMessage()
+
+const { copy, isSupported } = useClipboard()
 
 const fileListRef = ref<HTMLElement | null>()
 
@@ -195,6 +198,18 @@ function shareArticle(article: IArticle) {
   })
 }
 
+// 复制分享链接
+function copyShareLink(article: IArticle) {
+  if (!isSupported.value) {
+    tdMessage.error('您的浏览器不支持复制功能')
+    return
+  }
+  const baseUrl = window.location.origin
+  const shareUrl = `${baseUrl}/share/${article.id}?pwd=${article.share_password || ''}`
+  copy(shareUrl)
+  tdMessage.success('分享链接已复制到剪贴板')
+}
+
 defineExpose({
   refresh,
   search,
@@ -218,9 +233,16 @@ onMounted(() => {
                   <DeleteIcon class="text-primary-40 w-4 h-4 cursor-pointer hover:text-primary-100" />
                 </TPopconfirm>
 
-                <TPopconfirm v-if="article.is_shared" content="确定要取消分享吗？" @confirm="cancelShareArticle(article)">
-                  <CancelShare class="text-primary-40 w-4 h-4 cursor-pointer hover:text-primary-100" />
-                </TPopconfirm>
+                <template v-if="article.is_shared">
+                  <CopyIcon
+                    v-tooltip="{ content: '复制分享链接', placement: 'top' }"
+                    class="text-primary-40 w-4 h-4 cursor-pointer hover:text-primary-100"
+                    @click.stop="copyShareLink(article)"
+                  />
+                  <TPopconfirm content="确定要取消分享吗？" @confirm="cancelShareArticle(article)">
+                    <CancelShare class="text-primary-40 w-4 h-4 cursor-pointer hover:text-primary-100" />
+                  </TPopconfirm>
+                </template>
                 <TPopup v-else trigger="click">
                   <ShareIcon class="text-primary-40 w-4 h-4 cursor-pointer hover:text-primary-100" />
                   <template #content>

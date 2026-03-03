@@ -5,11 +5,13 @@ import type { ICategory } from '@/types/categoryTypes'
 import { useInfiniteScroll } from '@vueuse/core'
 import dayjs from 'dayjs'
 
-import { Popconfirm as TPopconfirm, Skeleton as TSkeleton, Tag as TTag } from 'tdesign-vue-next'
+import { Input as TInput, Popconfirm as TPopconfirm, Popup as TPopup, Skeleton as TSkeleton, Tag as TTag } from 'tdesign-vue-next'
 import { computed, onMounted, ref, watch } from 'vue'
-import { deleteArticleApi, getArticleListApi } from '@/api/article'
+import { deleteArticleApi, getArticleListApi, updateArticleApi } from '@/api/article'
+import CancelShare from '@/assets/svg/cancelShare.svg'
 import DeleteIcon from '@/assets/svg/delete.svg'
 import EditIcon from '@/assets/svg/edit.svg'
+import ShareIcon from '@/assets/svg/share.svg'
 import CustomCard from '@/components/CustomCard/index.vue'
 import { useTdMessage } from '@/hooks/useTdMessage'
 import { EArticleStatus, EArticleType } from '@/utils/enums/articleEnum'
@@ -146,6 +148,53 @@ function deleteArticle(article: IArticle) {
   })
 }
 
+// 分享文章处理逻辑
+const sharePassword = ref('')
+
+// 取消分享文章处理逻辑
+function cancelShareArticle(article: IArticle) {
+  sharePassword.value = ''
+  updateArticleApi(article.id, {
+    category_id: props.currentNode?.value ? String(props.currentNode.value) : '',
+    category_full_path: props.currentNode?.data.full_path || '',
+    is_shared: false,
+    share_password: '',
+  }).then((res) => {
+    if (res.code === 200) {
+      tdMessage.success('取消分享成功')
+      refresh()
+    }
+    else {
+      tdMessage.error('取消分享失败')
+    }
+  }).catch((err) => {
+    console.error(err)
+    tdMessage.error('取消分享失败')
+  })
+}
+
+function shareArticle(article: IArticle) {
+  updateArticleApi(article.id, {
+    category_id: props.currentNode?.value ? String(props.currentNode.value) : '',
+    category_full_path: props.currentNode?.data.full_path || '',
+    is_shared: true,
+    share_password: sharePassword.value,
+  }).then((res) => {
+    if (res.code === 200) {
+      tdMessage.success('分享成功')
+      refresh()
+    }
+    else {
+      tdMessage.error('分享失败')
+    }
+  }).catch((err) => {
+    console.error(err)
+    tdMessage.error('分享失败')
+  }).finally(() => {
+    sharePassword.value = ''
+  })
+}
+
 defineExpose({
   refresh,
   search,
@@ -168,6 +217,31 @@ onMounted(() => {
                 <TPopconfirm content="确定要删除吗？" @confirm="deleteArticle(article)">
                   <DeleteIcon class="text-primary-40 w-4 h-4 cursor-pointer hover:text-primary-100" />
                 </TPopconfirm>
+
+                <TPopconfirm v-if="article.is_shared" content="确定要取消分享吗？" @confirm="cancelShareArticle(article)">
+                  <CancelShare class="text-primary-40 w-4 h-4 cursor-pointer hover:text-primary-100" />
+                </TPopconfirm>
+                <TPopup v-else trigger="click">
+                  <ShareIcon class="text-primary-40 w-4 h-4 cursor-pointer hover:text-primary-100" />
+                  <template #content>
+                    <div class="p-2 flex flex-col gap-2">
+                      <div class="font-bold">
+                        分享文章
+                      </div>
+                      <div class="flex gap-2">
+                        <TInput
+                          v-model="sharePassword"
+                          type="password"
+                          :placeholder="article.is_shared ? '分享密码（可选）' : '修改密码'"
+                          style="width: 200px; margin-left: 20px;"
+                        />
+                        <TButton @click="shareArticle(article)">
+                          确认
+                        </TButton>
+                      </div>
+                    </div>
+                  </template>
+                </TPopup>
               </div>
             </template>
             <div class="flex justify-between items-center">

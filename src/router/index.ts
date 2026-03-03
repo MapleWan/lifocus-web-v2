@@ -71,6 +71,14 @@ const defaultRoutes: Array<RouteRecordRaw> = [
       },
     ],
   },
+  {
+    path: '/share/:id',
+    name: 'articleShare',
+    meta: {
+      title: '分享文章',
+    },
+    component: () => import('@/views/share/ArticleShare.vue'),
+  },
 ]
 
 const router = createRouter({

@@ -14,6 +14,7 @@ export interface IArticle {
   status: TArticleStatus
   content?: string
   is_shared: boolean
+  share_password?: string
   is_deleted: boolean
   create_time: string
   update_time: string
@@ -30,6 +31,8 @@ export interface IAddArticleParams {
   title: string
   status?: TArticleStatus
   content: string
+  is_shared?: boolean
+  share_password?: string
 }
 
 export type TArticleResponse = IApiResponse<IArticle[]>

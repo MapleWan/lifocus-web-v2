@@ -57,3 +57,18 @@ export function deleteArticleApi(id: string, data: {
     data,
   })
 }
+
+/**
+ * 获取分享的文章
+ * @param id
+ * @param data
+ */
+export function getSharedArticleApi(id: string, data?: {
+  password?: string
+  is_hashed: boolean
+}) {
+  return httpClient.post<IApiResponse<IArticle>>({
+    url: `/share/${id}`,
+    data,
+  })
+}

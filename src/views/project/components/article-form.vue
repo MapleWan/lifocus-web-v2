@@ -153,6 +153,9 @@ function saveArticle() {
           <TTag variant="light" :theme="article.status === 'ACTIVE' ? 'success' : 'primary'">
             {{ article?.status ? articleStatusValueToText[article.status] : '' }}
           </TTag>
+          <TTag v-if="article.is_shared" variant="light" theme="success">
+            已分享
+          </TTag>
           <div class="flex-1 overflow-hidden text-ellipsis whitespace-nowrap text-center font-bold">
             {{ article.title }}
           </div>

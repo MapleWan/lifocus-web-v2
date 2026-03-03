@@ -8,6 +8,7 @@ import LFRequest from './request'
 const useMessage = useTdMessage()
 // 需要忽略的白名单
 const whiteList: string[] = ['/auth/login', '/auth/register']
+const shareUrlList = ['/share/']
 
 export const httpClient = new LFRequest({
   baseURL: import.meta.env.VITE_BASE_API,
@@ -19,6 +20,9 @@ export const httpClient = new LFRequest({
           config.headers.Authorization = `Bearer ${getRefreshToken()}`
         return config
       }
+
+      if (shareUrlList.some(url => config.url?.includes(url)))
+        return config
 
       const token = getToken()?.accessToken || ''
       // console.log(token, '配置')

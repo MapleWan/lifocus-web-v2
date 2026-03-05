@@ -200,14 +200,59 @@ function shareArticle(article: IArticle) {
 
 // 复制分享链接
 function copyShareLink(article: IArticle) {
-  if (!isSupported.value) {
-    tdMessage.error('您的浏览器不支持复制功能')
-    return
-  }
   const baseUrl = window.location.origin
   const shareUrl = `${baseUrl}/share/${article.id}?pwd=${article.share_password || ''}`
-  copy(shareUrl)
-  tdMessage.success('分享链接已复制到剪贴板')
+
+  // 优先使用 VueUse 的 copy 方法
+  if (isSupported.value) {
+    copy(shareUrl).then(() => {
+      tdMessage.success('分享链接已复制到剪贴板')
+    }).catch(() => {
+      fallbackCopy(shareUrl)
+    })
+  }
+  else {
+    // 降级方案：使用传统复制方法
+    fallbackCopy(shareUrl)
+  }
+}
+
+// 降级复制方法
+function fallbackCopy(text: string) {
+  const textArea = document.createElement('textarea')
+  textArea.value = text
+  textArea.style.position = 'fixed'
+  textArea.style.top = '0'
+  textArea.style.left = '0'
+  textArea.style.width = '2em'
+  textArea.style.height = '2em'
+  textArea.style.padding = '0'
+  textArea.style.border = 'none'
+  textArea.style.outline = 'none'
+  textArea.style.boxShadow = 'none'
+  textArea.style.background = 'transparent'
+  textArea.style.opacity = '0'
+
+  document.body.appendChild(textArea)
+  textArea.focus()
+  textArea.select()
+
+  try {
+    const successful = document.execCommand('copy')
+    if (successful) {
+      tdMessage.success('分享链接已复制到剪贴板')
+    }
+    else {
+      tdMessage.error('复制失败，请手动复制链接')
+    }
+  }
+  catch (err) {
+    console.error('复制失败:', err)
+    tdMessage.error('复制失败，请手动复制链接')
+  }
+  finally {
+    document.body.removeChild(textArea)
+  }
 }
 
 defineExpose({

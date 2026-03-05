@@ -281,7 +281,7 @@ onMounted(() => {
   display: flex;
   justify-content: center;
   background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
-  min-height: calc(100vh - 84px);
+  overflow: hidden;
 }
 
 .content-area :deep(.md-editor) {
@@ -294,6 +294,7 @@ onMounted(() => {
     0 4px 12px rgba(0, 0, 0, 0.05);
   padding: 48px 56px;
   border: 1px solid rgba(226, 232, 240, 0.6);
+  height: calc(100vh - 160px) !important;
 }
 
 /* 预览内容样式优化 */
@@ -301,117 +302,6 @@ onMounted(() => {
   font-size: 16px;
   line-height: 1.8;
   color: #334155;
-}
-
-.content-area :deep(.md-editor .md-editor-preview h1) {
-  font-size: 28px;
-  font-weight: 700;
-  color: #1e293b;
-  margin-bottom: 24px;
-  padding-bottom: 16px;
-  border-bottom: 2px solid #e2e8f0;
-}
-
-.content-area :deep(.md-editor .md-editor-preview h2) {
-  font-size: 22px;
-  font-weight: 600;
-  color: #1e293b;
-  margin-top: 32px;
-  margin-bottom: 16px;
-}
-
-.content-area :deep(.md-editor .md-editor-preview h3) {
-  font-size: 18px;
-  font-weight: 600;
-  color: #334155;
-  margin-top: 24px;
-  margin-bottom: 12px;
-}
-
-.content-area :deep(.md-editor .md-editor-preview p) {
-  margin-bottom: 16px;
-}
-
-.content-area :deep(.md-editor .md-editor-preview code) {
-  background: #f1f5f9;
-  padding: 3px 8px;
-  border-radius: 6px;
-  font-size: 14px;
-  color: #ec4899;
-}
-
-.content-area :deep(.md-editor .md-editor-preview pre) {
-  background: #1e293b;
-  border-radius: 12px;
-  padding: 20px;
-  margin: 20px 0;
-  overflow-x: auto;
-}
-
-.content-area :deep(.md-editor .md-editor-preview pre code) {
-  background: transparent;
-  color: #e2e8f0;
-  padding: 0;
-}
-
-.content-area :deep(.md-editor .md-editor-preview blockquote) {
-  border-left: 4px solid #667eea;
-  background: #f8fafc;
-  padding: 16px 20px;
-  margin: 20px 0;
-  border-radius: 0 8px 8px 0;
-  color: #475569;
-}
-
-.content-area :deep(.md-editor .md-editor-preview ul,
-.md-editor .md-editor-preview ol) {
-  padding-left: 24px;
-  margin-bottom: 16px;
-}
-
-.content-area :deep(.md-editor .md-editor-preview li) {
-  margin-bottom: 8px;
-}
-
-.content-area :deep(.md-editor .md-editor-preview a) {
-  color: #667eea;
-  text-decoration: none;
-  border-bottom: 1px solid transparent;
-  transition: border-color 0.2s;
-}
-
-.content-area :deep(.md-editor .md-editor-preview a:hover) {
-  border-bottom-color: #667eea;
-}
-
-.content-area :deep(.md-editor .md-editor-preview img) {
-  max-width: 100%;
-  border-radius: 8px;
-  margin: 20px 0;
-}
-
-.content-area :deep(.md-editor .md-editor-preview table) {
-  width: 100%;
-  border-collapse: collapse;
-  margin: 20px 0;
-  border-radius: 8px;
-  overflow: hidden;
-}
-
-.content-area :deep(.md-editor .md-editor-preview th,
-.md-editor .md-editor-preview td) {
-  padding: 12px 16px;
-  border: 1px solid #e2e8f0;
-}
-
-.content-area :deep(.md-editor .md-editor-preview th) {
-  background: #f8fafc;
-  font-weight: 600;
-  color: #1e293b;
-}
-
-.content-area :deep(.md-editor .md-editor-preview tr:nth-child(even)) {
-  background: #f8fafc;
 }
 
 /* ===== 响应式适配 ===== */

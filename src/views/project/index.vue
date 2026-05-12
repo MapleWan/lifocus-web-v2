@@ -9,6 +9,7 @@ import { createCategoryApi, deleteCategoryApi, getCategoryListApi, updateCategor
 import AddIcon from '@/assets/svg/add.svg'
 import DeleteIcon from '@/assets/svg/delete.svg'
 import EditIcon from '@/assets/svg/edit.svg'
+import NoDataIcon from '@/assets/svg/noData.svg'
 import SearchIcon from '@/assets/svg/search.svg'
 import SortIcon from '@/assets/svg/sort.svg'
 import { useTdMessage } from '@/hooks/useTdMessage'
@@ -198,94 +199,124 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="flex gap-2 h-full overflow-hidden relative">
-    <div class="left w-64 p-r-4 border-r-1 border-r-dashed border-r-solid border-primary-10">
-      <div v-if="categoryTreeData && categoryTreeData.length" class="flex flex-col gap-2 justify-between">
-        <TPopup trigger="click">
-          <TButton theme="primary" variant="dashed" size="small">
+  <div class="project-wrapper">
+    <!-- 左：分类树 -->
+    <aside class="pane pane-left">
+      <div class="pane-head">
+        <div>
+          <p class="eyebrow">
+            Categories
+          </p>
+          <h3 class="pane-title">
+            分类管理
+          </h3>
+        </div>
+        <span v-if="categoryTreeData && categoryTreeData.length" class="count-pill">
+          {{ categoryTreeData.length }}
+        </span>
+      </div>
+
+      <div v-if="categoryTreeData && categoryTreeData.length" class="pane-body">
+        <TPopup trigger="click" placement="bottom-left">
+          <TButton class="add-root-btn" theme="primary" variant="outline" size="small" block>
             <template #icon>
               <AddIcon class="w-4 h-4" />
             </template>
             添加根节点
           </TButton>
           <template #content>
-            <div class="p-2 flex flex-col gap-2">
-              <div class="font-bold">
+            <div class="popup-form">
+              <div class="popup-form-title">
                 添加子节点
               </div>
-              <div class="flex gap-2">
+              <div class="popup-form-row">
                 <TInput v-model="newNodeName" placeholder="节点名称" autofocus @enter="addFirstCategory" />
-                <TButton @click="addFirstCategory">
+                <TButton theme="primary" @click="addFirstCategory">
                   添加
                 </TButton>
               </div>
             </div>
           </template>
         </TPopup>
-        <TTree ref="treeRef" v-model:actived="treeActivedValue" :data="categoryTreeData" :keys="{ label: 'name', value: 'id' }" activable hover transition :expand-level="1">
-          <template #label="{ node }">
-            {{ node.label }}
-          </template>
-          <template #operations="{ node }">
-            <div class="flex items-center m-l-1 gap-1 hover:opacity-100 transition-opacity group-hover:opacity-100">
-              <TPopup v-if="node.value !== -1" trigger="click">
-                <EditIcon class="c-primary-100 w-4 h-4 cursor-pointer hover:text-primary-50" @click="currentNodeName = node.label" />
-                <template #content>
-                  <div class="p-2 flex flex-col gap-2">
-                    <div class="font-bold">
-                      编辑子节点
+
+        <div class="tree-wrapper">
+          <TTree
+            ref="treeRef"
+            v-model:actived="treeActivedValue"
+            :data="categoryTreeData"
+            :keys="{ label: 'name', value: 'id' }"
+            activable hover transition
+            :expand-level="1"
+          >
+            <template #label="{ node }">
+              {{ node.label }}
+            </template>
+            <template #operations="{ node }">
+              <div class="tree-node-ops">
+                <TPopup v-if="node.value !== -1" trigger="click">
+                  <EditIcon class="tree-op-icon" @click="currentNodeName = node.label" />
+                  <template #content>
+                    <div class="popup-form">
+                      <div class="popup-form-title">
+                        编辑子节点
+                      </div>
+                      <div class="popup-form-row">
+                        <TInput v-model="currentNodeName" placeholder="节点名称" autofocus @enter="editNode(node)" />
+                        <TButton theme="primary" @click="editNode(node)">
+                          确定
+                        </TButton>
+                      </div>
                     </div>
-                    <div class="flex gap-2">
-                      <TInput v-model="currentNodeName" placeholder="节点名称" autofocus @enter="editNode(node)" />
-                      <TButton @click="editNode(node)">
-                        确定
-                      </TButton>
+                  </template>
+                </TPopup>
+                <TPopup trigger="click">
+                  <AddIcon class="tree-op-icon" />
+                  <template #content>
+                    <div class="popup-form">
+                      <div class="popup-form-title">
+                        添加子节点
+                      </div>
+                      <div class="popup-form-row">
+                        <TInput v-model="newNodeName" placeholder="节点名称" autofocus @enter="appendNode(node)" />
+                        <TButton theme="primary" @click="appendNode(node)">
+                          添加
+                        </TButton>
+                      </div>
                     </div>
-                  </div>
-                </template>
-              </TPopup>
-              <TPopup trigger="click">
-                <AddIcon class="c-primary-100 w-4 h-4 cursor-pointer hover:text-primary-50" />
-                <template #content>
-                  <div class="p-2 flex flex-col gap-2">
-                    <div class="font-bold">
-                      添加子节点
-                    </div>
-                    <div class="flex gap-2">
-                      <TInput v-model="newNodeName" placeholder="节点名称" autofocus @enter="appendNode(node)" />
-                      <TButton @click="appendNode(node)">
-                        添加
-                      </TButton>
-                    </div>
-                  </div>
-                </template>
-              </TPopup>
-              <TPopconfirm v-if="node.value !== -1" content="确认删除节点?" @confirm="removeNode(node)">
-                <DeleteIcon class="c-primary-100 w-3 h-3 cursor-pointer hover:text-primary-50" />
-              </TPopconfirm>
-            </div>
-          </template>
-        </TTree>
-      </div>
-      <div v-else class="flex flex-col items-center gap-2">
-        <div class="text-center text-primary-30 text-sm">
-          暂无分类，请先添加
+                  </template>
+                </TPopup>
+                <TPopconfirm v-if="node.value !== -1" content="确认删除节点?" @confirm="removeNode(node)">
+                  <DeleteIcon class="tree-op-icon tree-op-danger" />
+                </TPopconfirm>
+              </div>
+            </template>
+          </TTree>
         </div>
-        <TPopup trigger="click">
+      </div>
+
+      <div v-else class="pane-empty">
+        <NoDataIcon class="pane-empty-illus" />
+        <p class="pane-empty-title">
+          暂无分类
+        </p>
+        <p class="pane-empty-hint">
+          先创建一个分类，开始组织你的文章
+        </p>
+        <TPopup trigger="click" placement="bottom-left">
           <TButton theme="primary">
             <template #icon>
               <AddIcon class="w-4 h-4" />
             </template>
-            添加分类
+            创建分类
           </TButton>
           <template #content>
-            <div class="p-2 flex flex-col gap-2">
-              <div class="font-bold">
-                添加子节点
+            <div class="popup-form">
+              <div class="popup-form-title">
+                添加根节点
               </div>
-              <div class="flex gap-2">
+              <div class="popup-form-row">
                 <TInput v-model="newNodeName" placeholder="节点名称" autofocus @enter="addFirstCategory" />
-                <TButton @click="addFirstCategory">
+                <TButton theme="primary" @click="addFirstCategory">
                   添加
                 </TButton>
               </div>
@@ -293,67 +324,77 @@ onMounted(() => {
           </template>
         </TPopup>
       </div>
-    </div>
-    <div class="right flex-1 p-4 p-t-0 overflow-hidden flex flex-col gap-4">
+    </aside>
+
+    <!-- 右：文章列表 -->
+    <section class="pane pane-right">
       <template v-if="currentNode">
-        <div class="right-header flex items-center justify-between">
-          <div class="flex items-center gap-2">
-            <div class="font-bold">
-              文章列表
-            </div>
-            <div class="flex items-center gap-2">
-              <TDropdown trigger="click" @click="changeSort">
-                <div class="cursor-pointer flex items-center gap-2 c-gray-500">
-                  <SortIcon class="w-4 h-4 hover:text-primary-50" />
-                  <div class="text-sm text-gray-500 w-20">
-                    {{ sortTips }}
-                  </div>
-                </div>
-                <template #dropdown>
-                  <TDropdownItem value="update_time-desc" divider>
-                    更新时间⬇
-                  </TDropdownItem>
-                  <TDropdownItem value="update_time-asc" divider>
-                    更新时间⬆
-                  </TDropdownItem>
-                  <TDropdownItem value="create_time-desc" divider>
-                    创建时间⬇
-                  </TDropdownItem>
-                  <TDropdownItem value="create_time-asc" divider>
-                    创建时间⬆
-                  </TDropdownItem>
-                  <TDropdownItem value="title-desc" divider>
-                    文章标题⬇
-                  </TDropdownItem>
-                  <TDropdownItem value="title-asc" divider>
-                    文章标题⬆
-                  </TDropdownItem>
-                </template>
-              </TDropdown>
-              <TInput v-model="searchTitle" placeholder="标题搜索, 按回车键搜索" clearable size="small" @enter="search">
-                <template #suffixIcon>
-                  <SearchIcon class="w-4 h-4 cursor-pointer c-gray-400" />
-                </template>
-              </TInput>
-            </div>
+        <div class="right-header">
+          <div class="right-header-title">
+            <p class="eyebrow">
+              Articles
+            </p>
+            <h2 class="right-title" :title="currentNode.label">
+              {{ currentNode.label }}
+            </h2>
           </div>
-          <div>
+
+          <div class="right-header-tools">
+            <TDropdown trigger="click" @click="changeSort">
+              <button class="tool-chip sort-chip" type="button">
+                <SortIcon class="tool-chip-icon" />
+                <span class="tool-chip-text">{{ sortTips }}</span>
+              </button>
+              <template #dropdown>
+                <TDropdownItem value="update_time-desc" divider>
+                  更新时间⬇
+                </TDropdownItem>
+                <TDropdownItem value="update_time-asc" divider>
+                  更新时间⬆
+                </TDropdownItem>
+                <TDropdownItem value="create_time-desc" divider>
+                  创建时间⬇
+                </TDropdownItem>
+                <TDropdownItem value="create_time-asc" divider>
+                  创建时间⬆
+                </TDropdownItem>
+                <TDropdownItem value="title-desc" divider>
+                  文章标题⬇
+                </TDropdownItem>
+                <TDropdownItem value="title-asc" divider>
+                  文章标题⬆
+                </TDropdownItem>
+              </template>
+            </TDropdown>
+
+            <TInput v-model="searchTitle" class="search-input" placeholder="按回车搜索标题" clearable size="small" @enter="search">
+              <template #suffixIcon>
+                <SearchIcon class="w-4 h-4 cursor-pointer c-gray-400" />
+              </template>
+            </TInput>
+
             <TButton theme="primary" @click="addArticle">
               <template #icon>
                 <AddIcon class="w-4 h-4" />
               </template>
-              添加
+              新建文章
             </TButton>
           </div>
         </div>
-        <FileList ref="fileListRef" :current-node="currentNode" @view-article="viewArticle" @edit-article="editArticle" />
+
+        <FileList ref="fileListRef" class="file-list-shell" :current-node="currentNode" @view-article="viewArticle" @edit-article="editArticle" />
       </template>
-      <div v-else class="flex flex-col items-center gap-2">
-        <div class="text-center text-primary-30 text-sm">
-          请先选择一个分类查询
-        </div>
+
+      <div v-else class="right-empty">
+        <NoDataIcon class="right-empty-illus" />
+        <p class="right-empty-title">
+          选择一个分类开始
+        </p>
+        <p class="right-empty-hint">
+          从左侧树形菜单选择一个目录，查看其下的文章列表
+        </p>
       </div>
-    </div>
+    </section>
 
     <transition
       enter-active-class="duration-300 ease-out" enter-from-class="opacity-0 translate-x-5"
@@ -367,4 +408,345 @@ onMounted(() => {
 </template>
 
 <style scoped>
+.project-wrapper {
+  position: relative;
+  display: grid;
+  grid-template-columns: 260px minmax(0, 1fr);
+  gap: 16px;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* ===== pane ===== */
+.pane {
+  position: relative;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid rgba(80, 54, 109, 0.08);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.85);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.6) inset,
+    0 8px 24px rgba(45, 25, 76, 0.05);
+}
+
+.pane-left {
+  padding: 14px 12px;
+  gap: 12px;
+}
+
+.pane-right {
+  padding: 16px 18px;
+  gap: 14px;
+  overflow: hidden;
+}
+
+.pane-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 2px 4px 10px;
+  border-bottom: 1px dashed rgba(80, 54, 109, 0.1);
+}
+
+.eyebrow {
+  margin: 0;
+  color: rgba(29, 17, 50, 0.48);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.pane-title {
+  margin: 2px 0 0;
+  color: #1d1132;
+  font-size: 15px;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.count-pill {
+  min-width: 22px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, rgba(61, 34, 102, 0.1), rgba(67, 123, 112, 0.1));
+  color: #3d2266;
+  font-size: 11px;
+  font-weight: 800;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.pane-body {
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  overflow: auto;
+}
+
+.add-root-btn {
+  width: 100%;
+  justify-content: center;
+}
+
+.tree-wrapper {
+  flex: 1;
+  min-height: 0;
+  padding: 4px 2px;
+  border-radius: 8px;
+}
+
+.tree-wrapper :deep(.t-tree) {
+  --td-text-color-primary: #1d1132;
+}
+
+.tree-wrapper :deep(.t-tree__item) {
+  position: relative;
+  margin: 1px 0;
+  padding-left: 6px;
+  padding-right: 4px;
+  border-radius: 8px;
+  transition: background-color 0.18s ease, color 0.18s ease;
+}
+
+.tree-wrapper :deep(.t-tree__item:hover) {
+  background: rgba(61, 34, 102, 0.05);
+}
+
+.tree-wrapper :deep(.t-tree__item--active),
+.tree-wrapper :deep(.t-tree__item.t-is-active),
+.tree-wrapper :deep(.t-tree__item.t-is-actived),
+.tree-wrapper :deep(.t-tree__item--actived) {
+  background: rgba(61, 34, 102, 0.1);
+  color: #3d2266;
+  font-weight: 700;
+}
+
+.tree-wrapper :deep(.t-tree__item--active)::before,
+.tree-wrapper :deep(.t-tree__item.t-is-active)::before,
+.tree-wrapper :deep(.t-tree__item.t-is-actived)::before,
+.tree-wrapper :deep(.t-tree__item--actived)::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 2px;
+  width: 3px;
+  height: 55%;
+  transform: translateY(-50%);
+  border-radius: 2px;
+  background: linear-gradient(180deg, #3d2266, #437b70);
+  pointer-events: none;
+}
+
+.tree-wrapper :deep(.t-tree__label) {
+  padding-left: 2px;
+  font-size: 13.5px;
+  line-height: 1.5;
+}
+
+.tree-wrapper :deep(.t-tree__icon) {
+  color: rgba(29, 17, 50, 0.55);
+}
+
+.tree-wrapper :deep(.t-tree__operations) {
+  display: inline-flex;
+  align-items: center;
+}
+
+.tree-node-ops {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 6px;
+  gap: 6px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+:deep(.t-tree__item):hover .tree-node-ops,
+:deep(.t-tree__item--active) .tree-node-ops,
+:deep(.t-tree__item.t-is-active) .tree-node-ops,
+:deep(.t-tree__item.t-is-actived) .tree-node-ops,
+:deep(.t-tree__item--actived) .tree-node-ops {
+  opacity: 1;
+}
+
+.tree-op-icon {
+  width: 14px;
+  height: 14px;
+  color: #3d2266;
+  cursor: pointer;
+  transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.tree-op-icon:hover {
+  color: #437b70;
+  transform: scale(1.15);
+}
+
+.tree-op-danger:hover {
+  color: #a8595a;
+}
+
+/* ===== popup form ===== */
+.popup-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 6px 4px;
+  min-width: 220px;
+}
+
+.popup-form-title {
+  color: #1d1132;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.popup-form-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ===== empty states ===== */
+.pane-empty,
+.right-empty {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 24px 18px;
+}
+
+.pane-empty-illus {
+  width: 120px;
+  max-width: 70%;
+  height: auto;
+  opacity: 0.9;
+}
+
+.pane-empty-title,
+.right-empty-title {
+  margin: 4px 0 0;
+  color: #1d1132;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.pane-empty-hint,
+.right-empty-hint {
+  margin: 0 0 8px;
+  color: rgba(29, 17, 50, 0.5);
+  font-size: 12.5px;
+  text-align: center;
+  line-height: 1.6;
+}
+
+.right-empty-illus {
+  width: 180px;
+  max-width: 40%;
+  height: auto;
+  opacity: 0.85;
+}
+
+/* ===== right header ===== */
+.right-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px dashed rgba(80, 54, 109, 0.1);
+}
+
+.right-header-title {
+  min-width: 0;
+}
+
+.right-title {
+  margin: 2px 0 0;
+  overflow: hidden;
+  color: #1d1132;
+  font-size: 18px;
+  font-weight: 800;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.right-header-tools {
+  display: inline-flex;
+  align-items: center;
+  flex: 0 0 auto;
+  gap: 10px;
+}
+
+.tool-chip {
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 12px;
+  border: 1px solid rgba(80, 54, 109, 0.12);
+  border-radius: 8px;
+  background: #fff;
+  color: rgba(29, 17, 50, 0.72);
+  cursor: pointer;
+  font: inherit;
+  transition: border-color 0.2s ease, background-color 0.2s ease, color 0.2s ease;
+}
+
+.tool-chip:hover {
+  border-color: rgba(67, 123, 112, 0.32);
+  background: #f4f8f7;
+  color: #437b70;
+}
+
+.tool-chip-icon {
+  width: 14px;
+  height: 14px;
+}
+
+.tool-chip-text {
+  font-size: 12.5px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.search-input {
+  width: 200px;
+}
+
+.search-input :deep(.t-input) {
+  border-radius: 8px;
+}
+
+.file-list-shell {
+  flex: 1;
+  min-height: 0;
+  /* 滚动交给内部 .file-list-scroll 处理，不在这里设 overflow: hidden */
+}
+
+@media (max-width: 900px) {
+  .project-wrapper {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto minmax(0, 1fr);
+    overflow: auto;
+  }
+
+  .right-header {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .search-input {
+    width: 100%;
+  }
+}
 </style>

@@ -1,11 +1,14 @@
 <script setup lang="ts">
 import type { IArticle } from '@/types/articleTypes'
-import { Button as TButton, Input as TInput, Loading as TLoading } from 'tdesign-vue-next'
+import dayjs from 'dayjs'
+import { Button as TButton, Input as TInput, Tag as TTag } from 'tdesign-vue-next'
 import { onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { getSharedArticleApi } from '@/api/article'
+import LogoIcon from '@/assets/svg/logo.svg'
 import Editor from '@/components/Editor/index.vue'
 import { useTdMessage } from '@/hooks/useTdMessage'
+import { EArticleStatus, EArticleType } from '@/utils/enums/articleEnum'
 
 const tdMessage = useTdMessage()
 
@@ -15,6 +18,16 @@ const urlPassword = route.query.pwd as string | undefined
 const article = ref<IArticle | null>(null)
 const loading = ref(false)
 const password = ref('')
+
+const articleTypeValueToText = EArticleType.reduce((acc, cur) => {
+  acc[cur.value] = cur.label
+  return acc
+}, {} as Record<string, string>)
+
+const articleStatusValueToText = EArticleStatus.reduce((acc, cur) => {
+  acc[cur.value] = cur.label
+  return acc
+}, {} as Record<string, string>)
 
 async function fetchArticle(pwd: string = '', isHashed: boolean = false) {
   loading.value = true
@@ -60,309 +73,548 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="share-container">
-    <!-- 密码输入表单 -->
-    <div v-if="!article && !loading" class="password-form-wrapper">
-      <div class="password-form">
-        <h2>请输入密码访问文章</h2>
+  <div class="share-shell">
+    <!-- 密码输入门 -->
+    <div v-if="!article && !loading" class="gate-wrap">
+      <div class="gate-card">
+        <div class="gate-badge">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="5" y="11" width="14" height="10" rx="2" stroke="currentColor" stroke-width="2" />
+            <path d="M8 11V8a4 4 0 0 1 8 0v3" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+            <circle cx="12" cy="16" r="1.2" fill="currentColor" />
+          </svg>
+        </div>
+        <p class="gate-eyebrow">
+          Protected Share
+        </p>
+        <h2 class="gate-title">
+          这是一篇受密码保护的文章
+        </h2>
+        <p class="gate-hint">
+          请输入分享者提供的访问密码，继续阅读
+        </p>
+
         <TInput
           v-model="password"
+          class="gate-input"
           type="password"
           placeholder="请输入密码"
           @keyup.enter="submitPassword"
         />
-        <TButton theme="primary" class="submit-btn" @click="submitPassword">
-          确定
+
+        <TButton class="gate-submit" theme="primary" block @click="submitPassword">
+          解锁阅读
         </TButton>
+
+        <div class="gate-footer">
+          <LogoIcon class="gate-footer-logo" />
+          <span>Powered by LiFocus</span>
+        </div>
       </div>
     </div>
 
     <!-- 加载中 -->
-    <div v-if="loading" class="loading-wrapper">
-      <TLoading text="加载中..." />
+    <div v-if="loading" class="loading-wrap">
+      <div class="loading-box">
+        <div class="load-dot" />
+        <div class="load-dot" style="animation-delay: 0.15s" />
+        <div class="load-dot" style="animation-delay: 0.3s" />
+        <span>正在加载分享内容...</span>
+      </div>
     </div>
 
-    <!-- 文章内容预览 - 参考 article-form.vue 样式 -->
-    <div v-if="article" class="article-preview">
-      <!-- 头部栏 -->
-      <div class="head-bar">
-        <div class="head-content">
-          <div class="head-icon">
-            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M14 2H6C4.9 2 4 2.9 4 4V20C4 21.1 4.9 22 6 22H18C19.1 22 20 21.1 20 20V8L14 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-              <path d="M14 2V8H20" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-              <path d="M16 13H8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-              <path d="M16 17H8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-              <path d="M10 9H9H8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-            </svg>
+    <!-- 文章预览 -->
+    <div v-if="article" class="article-wrap">
+      <!-- 顶部品牌栏 -->
+      <header class="share-topbar">
+        <div class="share-topbar-inner">
+          <div class="share-brand">
+            <LogoIcon class="share-brand-logo" />
+            <span class="share-brand-text">LiFocus</span>
+            <span class="share-brand-divider" />
+            <span class="share-brand-tag">文章分享</span>
           </div>
-          <div class="head-title-wrapper">
-            <div class="title">
-              {{ article.title }}
-            </div>
+          <div class="share-topbar-meta">
+            <span v-if="article.update_time" class="share-meta-time">
+              {{ dayjs(article.update_time).format('YYYY-MM-DD HH:mm') }}
+            </span>
           </div>
         </div>
-      </div>
+      </header>
 
-      <!-- 内容区域 - 使用 Editor 组件预览 -->
-      <div class="content-area">
-        <Editor
-          v-model="article.content"
-          :is-preview="true"
-          :editor-config="{ disabled: true }"
-        />
-      </div>
+      <!-- 文章卡片 -->
+      <main class="article-main">
+        <article class="article-card">
+          <div class="article-head">
+            <p class="article-eyebrow">
+              Shared Article
+            </p>
+            <h1 class="article-title">
+              {{ article.title }}
+            </h1>
+            <div class="article-meta">
+              <TTag v-if="article.type" variant="light" :theme="article.type === 'NOTE' ? 'primary' : 'success'" size="small">
+                {{ articleTypeValueToText[article.type] }}
+              </TTag>
+              <TTag v-if="article.status" variant="light-outline" :theme="article.status === 'ACTIVE' ? 'success' : 'primary'" size="small">
+                {{ articleStatusValueToText[article.status] }}
+              </TTag>
+              <span v-if="article.category?.name" class="article-meta-cat">
+                {{ article.category.name }}
+              </span>
+              <span v-if="article.update_time" class="article-meta-time">
+                · 更新于 {{ dayjs(article.update_time).format('YYYY-MM-DD') }}
+              </span>
+            </div>
+          </div>
+
+          <div class="article-divider" />
+
+          <div class="article-body">
+            <Editor
+              v-model="article.content"
+              :is-preview="true"
+              :editor-config="{ disabled: true }"
+            />
+          </div>
+        </article>
+
+        <footer class="share-footer">
+          <span>内容由作者通过 LiFocus 分享产生</span>
+        </footer>
+      </main>
     </div>
   </div>
 </template>
 
 <style scoped>
-/* ===== 基础容器 ===== */
-.share-container {
-  min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+/* ============ shell ============ */
+.share-shell {
+  position: relative;
+  height: 100vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  background:
+    radial-gradient(1100px 500px at -5% -10%, rgba(61, 34, 102, 0.16), transparent 60%),
+    radial-gradient(1100px 500px at 110% 110%, rgba(67, 123, 112, 0.16), transparent 60%),
+    radial-gradient(600px 300px at 50% 120%, rgba(128, 108, 151, 0.1), transparent 70%),
+    linear-gradient(135deg, #f7f8fb, #edf4f2);
 }
 
-/* ===== 密码表单样式 ===== */
-.password-form-wrapper {
+.share-shell::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(to right, rgba(61, 34, 102, 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(61, 34, 102, 0.04) 1px, transparent 1px);
+  background-size: 40px 40px;
+  mask-image: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.9), transparent 70%);
+  -webkit-mask-image: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.9), transparent 70%);
+}
+
+/* ============ gate (密码门) ============ */
+.gate-wrap {
+  position: relative;
+  z-index: 1;
   display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
   min-height: 100vh;
-  padding: 24px;
+  padding: 32px 20px;
 }
 
-.password-form {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
-  border-radius: 20px;
-  box-shadow:
-    0 20px 60px rgba(0, 0, 0, 0.3),
-    0 0 0 1px rgba(255, 255, 255, 0.2) inset;
-  padding: 48px 40px;
+.gate-card {
+  width: 100%;
   max-width: 420px;
-  width: 100%;
+  padding: 40px 36px 28px;
+  border: 1px solid rgba(80, 54, 109, 0.1);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.7),
+    0 24px 60px rgba(45, 25, 76, 0.12);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
   text-align: center;
-  animation: slideUp 0.5s ease-out;
+  animation: gate-in 0.45s ease-out;
 }
 
-@keyframes slideUp {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+@keyframes gate-in {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-.password-form h2 {
-  margin-bottom: 32px;
-  color: #1a1a2e;
-  font-size: 24px;
-  font-weight: 600;
-  letter-spacing: -0.5px;
-}
-
-.password-form :deep(.t-input) {
-  border-radius: 12px;
-  height: 48px;
-  font-size: 15px;
-}
-
-.password-form :deep(.t-input__inner) {
-  padding: 0 16px;
-}
-
-.submit-btn {
-  margin-top: 24px;
-  width: 100%;
-  height: 48px;
-  border-radius: 12px;
-  font-size: 16px;
-  font-weight: 500;
-  letter-spacing: 0.5px;
-  box-shadow: 0 4px 14px rgba(102, 126, 234, 0.4);
-  transition: all 0.3s ease;
-}
-
-.submit-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
-}
-
-/* ===== 加载中样式 ===== */
-.loading-wrapper {
-  display: flex;
-  justify-content: center;
+.gate-badge {
+  width: 58px;
+  height: 58px;
+  margin: 0 auto 14px;
+  display: inline-flex;
   align-items: center;
+  justify-content: center;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #3d2266, #437b70);
+  color: #fff;
+  box-shadow: 0 12px 28px rgba(61, 34, 102, 0.3);
+}
+
+.gate-badge svg {
+  width: 28px;
+  height: 28px;
+}
+
+.gate-eyebrow {
+  margin: 0 0 8px;
+  color: rgba(29, 17, 50, 0.5);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.gate-title {
+  margin: 0 0 8px;
+  color: #1d1132;
+  font-size: 19px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+
+.gate-hint {
+  margin: 0 0 22px;
+  color: rgba(29, 17, 50, 0.55);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.gate-input :deep(.t-input) {
+  height: 46px;
+  border: 1px solid rgba(80, 54, 109, 0.12);
+  border-radius: 12px;
+  background: #fff;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.gate-input :deep(.t-input.t-is-focused) {
+  border-color: rgba(67, 123, 112, 0.45);
+  box-shadow: 0 0 0 4px rgba(67, 123, 112, 0.12);
+}
+
+.gate-input :deep(.t-input__inner) {
+  padding: 0 14px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.gate-submit {
+  margin-top: 18px !important;
+  height: 46px !important;
+  border-radius: 12px !important;
+  border-color: transparent !important;
+  background: linear-gradient(135deg, #3d2266, #437b70) !important;
+  font-size: 15px !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.02em;
+  box-shadow: 0 10px 24px rgba(61, 34, 102, 0.28);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease !important;
+}
+
+.gate-submit:hover {
+  filter: brightness(1.06);
+  transform: translateY(-1px);
+  box-shadow: 0 14px 30px rgba(61, 34, 102, 0.34);
+}
+
+.gate-footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 22px;
+  color: rgba(29, 17, 50, 0.4);
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.gate-footer-logo {
+  width: 14px;
+  height: 14px;
+  opacity: 0.75;
+}
+
+/* ============ loading ============ */
+.loading-wrap {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   min-height: 100vh;
 }
 
-/* ===== 文章预览样式 ===== */
-.article-preview {
+.loading-box {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 22px;
+  border: 1px solid rgba(80, 54, 109, 0.08);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.85);
+  box-shadow: 0 12px 28px rgba(45, 25, 76, 0.08);
+  color: #3d2266;
+  font-size: 13px;
+  font-weight: 700;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.load-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #3d2266, #437b70);
+  animation: load-bounce 0.9s ease-in-out infinite;
+}
+
+@keyframes load-bounce {
+  0%, 100% { transform: translateY(0); opacity: 0.55; }
+  50% { transform: translateY(-6px); opacity: 1; }
+}
+
+/* ============ article ============ */
+.article-wrap {
+  position: relative;
+  z-index: 1;
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
-  background: #f8fafc;
 }
 
-/* 头部栏 */
-.head-bar {
-  padding: 0;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-bottom: none;
-  box-shadow: 0 4px 20px rgba(102, 126, 234, 0.3);
+/* 顶部品牌栏 */
+.share-topbar {
   position: sticky;
   top: 0;
-  z-index: 10;
+  z-index: 5;
+  padding: 10px 20px;
+  border-bottom: 1px solid rgba(80, 54, 109, 0.08);
+  background: rgba(255, 255, 255, 0.78);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
 }
 
-.head-content {
+.share-topbar-inner {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 16px;
-  max-width: 900px;
+  max-width: 1080px;
   margin: 0 auto;
-  padding: 20px 32px;
-  width: 100%;
 }
 
-.head-icon {
-  flex-shrink: 0;
-  width: 44px;
-  height: 44px;
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 12px;
-  display: flex;
+.share-brand {
+  display: inline-flex;
   align-items: center;
-  justify-content: center;
-  backdrop-filter: blur(4px);
+  gap: 10px;
 }
 
-.head-icon svg {
-  width: 24px;
-  height: 24px;
-  color: white;
+.share-brand-logo {
+  width: 26px;
+  height: 26px;
+  color: #3d2266;
 }
 
-.head-title-wrapper {
+.share-brand-text {
+  background: linear-gradient(135deg, #3d2266, #437b70);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+
+.share-brand-divider {
+  width: 1px;
+  height: 18px;
+  background: rgba(80, 54, 109, 0.14);
+}
+
+.share-brand-tag {
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(67, 123, 112, 0.1);
+  color: #437b70;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+
+.share-topbar-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: rgba(29, 17, 50, 0.55);
+  font-size: 12.5px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+/* 主体 */
+.article-main {
   flex: 1;
-  min-width: 0;
+  width: 100%;
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 28px 20px 40px;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 16px;
 }
 
-.head-label {
-  font-size: 12px;
-  font-weight: 500;
-  color: rgba(255, 255, 255, 0.7);
-  text-transform: uppercase;
-  letter-spacing: 1px;
-}
-
-.head-bar .title {
-  font-size: 18px;
-  font-weight: 600;
-  color: white;
-  white-space: nowrap;
+.article-card {
+  position: relative;
+  padding: 36px 40px 28px;
+  border: 1px solid rgba(80, 54, 109, 0.08);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.7),
+    0 18px 50px rgba(45, 25, 76, 0.06);
   overflow: hidden;
-  text-overflow: ellipsis;
-  letter-spacing: -0.2px;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
-/* 内容区域 */
-.content-area {
-  flex: 1;
-  padding: 32px 24px;
+.article-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #3d2266, #437b70, #5b8f5a);
+}
+
+.article-head {
+  margin-bottom: 18px;
+}
+
+.article-eyebrow {
+  margin: 0 0 8px;
+  color: rgba(29, 17, 50, 0.45);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.article-title {
+  margin: 0 0 14px;
+  color: #1d1132;
+  font-size: 28px;
+  font-weight: 800;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+  word-break: break-word;
+}
+
+.article-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  color: rgba(29, 17, 50, 0.5);
+  font-size: 12.5px;
+  font-weight: 600;
+}
+
+.article-meta-cat {
+  color: #437b70;
+  font-weight: 700;
+}
+
+.article-meta-cat::before {
+  content: '#';
+  margin-right: 2px;
+  color: #5b8f5a;
+  font-weight: 800;
+}
+
+.article-meta-time {
+  color: rgba(29, 17, 50, 0.45);
+}
+
+.article-divider {
+  height: 1px;
+  margin: 0 -4px 18px;
+  background: linear-gradient(90deg, transparent, rgba(80, 54, 109, 0.18), transparent);
+}
+
+.article-body {
+  min-height: 320px;
+}
+
+/* 预览内容内部样式 */
+.article-body :deep(.md-editor) {
+  background: transparent;
+  border: none;
+  height: auto !important;
+}
+
+.article-body :deep(.md-editor-preview) {
+  padding: 0;
+  font-size: 15.5px;
+  line-height: 1.85;
+  color: #1d1132;
+}
+
+/* footer */
+.share-footer {
   display: flex;
   justify-content: center;
-  background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
-  overflow: hidden;
+  color: rgba(29, 17, 50, 0.4);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
 }
 
-.content-area :deep(.md-editor) {
-  max-width: 860px;
-  width: 100%;
-  background: #ffffff;
-  border-radius: 16px;
-  box-shadow:
-    0 10px 40px -10px rgba(102, 126, 234, 0.15),
-    0 4px 12px rgba(0, 0, 0, 0.05);
-  padding: 48px 56px;
-  border: 1px solid rgba(226, 232, 240, 0.6);
-  height: calc(100vh - 160px) !important;
-}
-
-/* 预览内容样式优化 */
-.content-area :deep(.md-editor .md-editor-preview) {
-  font-size: 16px;
-  line-height: 1.8;
-  color: #334155;
-}
-
-/* ===== 响应式适配 ===== */
+/* ============ responsive ============ */
 @media (max-width: 768px) {
-  .password-form {
-    padding: 32px 24px;
-    margin: 16px;
+  .gate-card {
+    padding: 32px 24px 22px;
+    border-radius: 16px;
   }
 
-  .password-form h2 {
-    font-size: 20px;
-    margin-bottom: 24px;
+  .gate-title {
+    font-size: 17px;
   }
 
-  .head-content {
-    padding: 16px 20px;
-    gap: 12px;
+  .share-topbar {
+    padding: 8px 14px;
   }
 
-  .head-icon {
-    width: 38px;
-    height: 38px;
-    border-radius: 10px;
-  }
-
-  .head-icon svg {
-    width: 20px;
-    height: 20px;
-  }
-
-  .head-label {
-    font-size: 11px;
-  }
-
-  .head-bar .title {
-    font-size: 16px;
-  }
-
-  .content-area {
-    padding: 20px 16px;
-    background: #f8fafc;
-  }
-
-  .content-area :deep(.md-editor) {
-    padding: 28px 24px;
-    border-radius: 12px;
-    box-shadow:
-      0 4px 20px rgba(102, 126, 234, 0.1),
-      0 2px 8px rgba(0, 0, 0, 0.04);
-  }
-
-  .content-area :deep(.md-editor .md-editor-preview) {
+  .share-brand-text {
     font-size: 15px;
   }
 
-  .content-area :deep(.md-editor .md-editor-preview h1) {
+  .share-brand-tag {
+    display: none;
+  }
+
+  .article-main {
+    padding: 18px 12px 28px;
+  }
+
+  .article-card {
+    padding: 22px 18px 18px;
+    border-radius: 14px;
+  }
+
+  .article-title {
     font-size: 22px;
   }
 
-  .content-area :deep(.md-editor .md-editor-preview h2) {
-    font-size: 18px;
+  .article-body :deep(.md-editor-preview) {
+    font-size: 15px;
   }
 }
 </style>

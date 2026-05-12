@@ -109,7 +109,7 @@ const content = defineModel({
 </script>
 
 <template>
-  <MdPreview v-if="isPreview" v-model="content" v-bind="previewConfigTemplate" style="height: 100%; width: 80%;" />
+  <MdPreview v-if="isPreview" v-model="content" v-bind="previewConfigTemplate" style="height: 100%; width: 100%;" />
   <MdEditor v-else v-model="content" v-bind="editorConfigTemplate" style="height: 100%;" :footers="footers">
     <template #defFooters>
       {{ dayjs().format('YYYY-MM-DD HH:mm:ss') }}

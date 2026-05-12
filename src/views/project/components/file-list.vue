@@ -12,6 +12,7 @@ import CancelShare from '@/assets/svg/cancelShare.svg'
 import CopyIcon from '@/assets/svg/copy.svg'
 import DeleteIcon from '@/assets/svg/delete.svg'
 import EditIcon from '@/assets/svg/edit.svg'
+import NoDataIcon from '@/assets/svg/noData.svg'
 import ShareIcon from '@/assets/svg/share.svg'
 import CustomCard from '@/components/CustomCard/index.vue'
 import { useTdMessage } from '@/hooks/useTdMessage'
@@ -266,43 +267,49 @@ onMounted(() => {
 </script>
 
 <template>
-  <div ref="fileListRef" class="p-t-1 h-full overflow-auto custom-scrollbar">
+  <div ref="fileListRef" class="file-list-scroll">
     <TSkeleton :loading="isLoading && articleList.length === 0" animation="gradient" theme="paragraph">
-      <div v-if="articleList.length" class="file-list">
+      <div v-if="articleList.length" class="file-grid">
         <template v-for="article in articleList" :key="article.id">
-          <CustomCard :title="article.title" hover-shadow class="cursor-pointer" clickable @click="viewArticle(article)">
+          <CustomCard :title="article.title" hover-shadow class="note-card" clickable @click="viewArticle(article)">
             <template #actions>
-              <div class="flex items-center gap-2">
-                <EditIcon class="text-primary-40 w-4 h-4 cursor-pointer hover:text-primary-100" @click.stop="editArticle(article)" />
+              <div class="note-actions">
+                <button class="action-icon" title="编辑" @click.stop="editArticle(article)">
+                  <EditIcon />
+                </button>
                 <TPopconfirm content="确定要删除吗？" @confirm="deleteArticle(article)">
-                  <DeleteIcon class="text-primary-40 w-4 h-4 cursor-pointer hover:text-primary-100" />
+                  <button class="action-icon action-icon-danger" title="删除" @click.stop>
+                    <DeleteIcon />
+                  </button>
                 </TPopconfirm>
 
                 <template v-if="article.is_shared">
-                  <CopyIcon
+                  <button
                     v-tooltip="{ content: '复制分享链接', placement: 'top' }"
-                    class="text-primary-40 w-4 h-4 cursor-pointer hover:text-primary-100"
+                    class="action-icon action-icon-accent"
+                    title="复制链接"
                     @click.stop="copyShareLink(article)"
-                  />
+                  >
+                    <CopyIcon />
+                  </button>
                   <TPopconfirm content="确定要取消分享吗？" @confirm="cancelShareArticle(article)">
-                    <CancelShare class="text-primary-40 w-4 h-4 cursor-pointer hover:text-primary-100" />
+                    <button class="action-icon" title="取消分享" @click.stop>
+                      <CancelShare />
+                    </button>
                   </TPopconfirm>
                 </template>
                 <TPopup v-else trigger="click">
-                  <ShareIcon class="text-primary-40 w-4 h-4 cursor-pointer hover:text-primary-100" />
+                  <button class="action-icon action-icon-accent" title="分享" @click.stop>
+                    <ShareIcon />
+                  </button>
                   <template #content>
-                    <div class="p-2 flex flex-col gap-2">
-                      <div class="font-bold">
+                    <div class="share-popup">
+                      <div class="share-popup-title">
                         分享文章
                       </div>
-                      <div class="flex gap-2">
-                        <TInput
-                          v-model="sharePassword"
-                          type="password"
-                          :placeholder="article.is_shared ? '分享密码（可选）' : '修改密码'"
-                          style="width: 200px; margin-left: 20px;"
-                        />
-                        <TButton @click="shareArticle(article)">
+                      <div class="share-popup-row">
+                        <TInput v-model="sharePassword" type="password" placeholder="分享密码（可选）" />
+                        <TButton theme="primary" @click="shareArticle(article)">
                           确认
                         </TButton>
                       </div>
@@ -311,96 +318,333 @@ onMounted(() => {
                 </TPopup>
               </div>
             </template>
-            <div class="flex justify-between items-center">
-              <div class="gap-2 flex">
-                <TTag variant="light" :theme="article.type === 'NOTE' ? 'primary' : 'success'">
+
+            <div class="note-meta">
+              <div class="note-tags">
+                <TTag variant="light" :theme="article.type === 'NOTE' ? 'primary' : 'success'" size="small">
                   {{ articleTypeValueToText[article.type] }}
                 </TTag>
-                <TTag variant="light" :theme="article.status === 'ACTIVE' ? 'success' : 'primary'">
+                <TTag variant="light-outline" :theme="article.status === 'ACTIVE' ? 'success' : 'primary'" size="small">
                   {{ articleStatusValueToText[article.status] }}
                 </TTag>
+                <span v-if="article.is_shared" class="share-flag">
+                  <ShareIcon />
+                  <span>已分享</span>
+                </span>
               </div>
-              <div class="text-sm text-gray-500 text-overflow m-x-2" :title="article.category.name">
-                {{ article.category.name }}
-              </div>
-              <div class="text-sm text-gray-500 text-overflow" :title="dayjs(article.update_time).format('YY-MM-DD HH:mm')">
-                {{ dayjs(article.update_time).format('YY-MM-DD HH:mm') }}
+              <div class="note-foot">
+                <span class="note-cat" :title="article.category.name">
+                  {{ article.category.name }}
+                </span>
+                <span class="note-time" :title="dayjs(article.update_time).format('YYYY-MM-DD HH:mm')">
+                  {{ dayjs(article.update_time).format('YY-MM-DD HH:mm') }}
+                </span>
               </div>
             </div>
           </CustomCard>
         </template>
       </div>
-      <div v-else class="flex flex-col items-center gap-2">
-        <div class="text-center text-primary-30 text-sm">
-          暂无数据
-        </div>
+
+      <div v-else class="empty-state">
+        <NoDataIcon class="empty-illus" />
+        <p class="empty-title">
+          暂无文章
+        </p>
+        <p class="empty-hint">
+          点击右上角「新建文章」开始记录
+        </p>
       </div>
-      <div v-if="hasMore" class="flex justify-center items-center py-4">
-        <div class="flex items-center gap-2 text-primary-50 text-sm">
-          <div class="w-2 h-2 rounded-full bg-primary-50 animate-bounce" />
-          <div class="w-2 h-2 rounded-full bg-primary-50 animate-bounce" style="animation-delay: 0.2s" />
-          <div class="w-2 h-2 rounded-full bg-primary-50 animate-bounce" style="animation-delay: 0.4s" />
-          <span>滚动加载更多内容...</span>
-        </div>
+
+      <div v-if="hasMore" class="loading-more">
+        <div class="load-dot" />
+        <div class="load-dot" style="animation-delay: 0.15s" />
+        <div class="load-dot" style="animation-delay: 0.3s" />
+        <span>滚动加载更多</span>
       </div>
     </TSkeleton>
   </div>
 </template>
 
 <style scoped>
-.file-list {
+.file-list-scroll {
+  height: 100%;
+  padding: 4px 2px 4px 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.file-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 14px;
+  padding: 2px;
 }
 
-/* 卡片悬停增强效果 */
-:deep(.t-card) {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+/* ====== card shell ====== */
+.note-card :deep(.lf-card) {
+  border: 1px solid rgba(80, 54, 109, 0.1);
   border-radius: 12px;
+  background: #fff;
   overflow: hidden;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.6) inset;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
 }
 
-:deep(.t-card:hover) {
+.note-card :deep(.lf-card:hover) {
+  border-color: rgba(67, 123, 112, 0.3);
+  box-shadow: 0 14px 28px rgba(45, 25, 76, 0.08);
   transform: translateY(-2px);
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
 }
 
-/* 自定义滚动条样式 */
-.custom-scrollbar {
-  /* Webkit browsers (Chrome, Safari, Edge) */
-  &::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
+.note-card :deep(.lf-card--hover-shadow) {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 28px rgba(45, 25, 76, 0.08);
+}
+
+.note-card :deep(.lf-card__body) {
+  padding: 14px 14px 12px;
+}
+
+.note-card :deep(.lf-card__header) {
+  margin-bottom: 10px;
+}
+
+.note-card :deep(.lf-card__title) {
+  margin-bottom: 0;
+  color: #1d1132;
+  font-size: 15px;
+  font-weight: 800;
+  line-height: 1.3;
+}
+
+/* accent line on hover */
+.note-card :deep(.lf-card)::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #3d2266, #437b70, #5b8f5a);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.note-card :deep(.lf-card:hover)::before {
+  opacity: 1;
+}
+
+/* ====== actions ====== */
+.note-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.action-icon {
+  width: 26px;
+  height: 26px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  background: transparent;
+  color: rgba(29, 17, 50, 0.5);
+  cursor: pointer;
+  transition: border-color 0.2s ease, background-color 0.2s ease, color 0.2s ease;
+}
+
+.action-icon svg {
+  width: 13px;
+  height: 13px;
+}
+
+.action-icon:hover {
+  border-color: rgba(67, 123, 112, 0.3);
+  background: #f4f8f7;
+  color: #437b70;
+}
+
+.action-icon.action-icon-accent:hover {
+  border-color: rgba(61, 34, 102, 0.3);
+  background: #f5f1fb;
+  color: #3d2266;
+}
+
+.action-icon.action-icon-danger:hover {
+  border-color: rgba(168, 89, 90, 0.3);
+  background: #fdf2f2;
+  color: #a8595a;
+}
+
+/* ====== meta ====== */
+.note-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.note-tags {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.share-flag {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  height: 22px;
+  padding: 0 8px;
+  border-radius: 4px;
+  background: rgba(67, 123, 112, 0.1);
+  color: #437b70;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.share-flag svg {
+  width: 10px;
+  height: 10px;
+}
+
+.note-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding-top: 8px;
+  border-top: 1px dashed rgba(80, 54, 109, 0.1);
+  color: rgba(29, 17, 50, 0.55);
+  font-size: 11.5px;
+}
+
+.note-cat {
+  min-width: 0;
+  overflow: hidden;
+  color: #437b70;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.note-cat::before {
+  content: '#';
+  margin-right: 2px;
+  color: #5b8f5a;
+  font-weight: 800;
+}
+
+.note-time {
+  flex: 0 0 auto;
+  color: rgba(29, 17, 50, 0.48);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ====== share popup ====== */
+.share-popup {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 6px 4px;
+  min-width: 260px;
+}
+
+.share-popup-title {
+  color: #1d1132;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.share-popup-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ====== empty ====== */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 48px 20px;
+}
+
+.empty-illus {
+  width: 180px;
+  max-width: 50%;
+  height: auto;
+  opacity: 0.85;
+}
+
+.empty-title {
+  margin: 4px 0 0;
+  color: #1d1132;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.empty-hint {
+  margin: 0;
+  color: rgba(29, 17, 50, 0.5);
+  font-size: 12.5px;
+}
+
+/* ====== loading more ====== */
+.loading-more {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 16px 0;
+  color: rgba(61, 34, 102, 0.6);
+  font-size: 12.5px;
+  font-weight: 600;
+}
+
+.load-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #3d2266, #437b70);
+  animation: load-bounce 0.9s ease-in-out infinite;
+}
+
+@keyframes load-bounce {
+  0%, 100% {
+    transform: translateY(0);
+    opacity: 0.55;
   }
-
-  &::-webkit-scrollbar-track {
-    background: transparent;
-    border-radius: 4px;
+  50% {
+    transform: translateY(-5px);
+    opacity: 1;
   }
+}
 
-  &::-webkit-scrollbar-thumb {
-    background: linear-gradient(180deg, #d9d9d9, #bfbfbf);
-    border-radius: 4px;
-    border: 2px solid transparent;
-    background-clip: content-box;
-    transition: all 0.3s ease;
-  }
+/* ====== scrollbar ====== */
+.file-list-scroll::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
 
-  &::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(180deg, #bfbfbf, #a6a6a6);
-    border: 1px solid transparent;
-  }
+.file-list-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
 
-  &::-webkit-scrollbar-corner {
-    background: transparent;
-  }
+.file-list-scroll::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, rgba(61, 34, 102, 0.25), rgba(67, 123, 112, 0.25));
+  border: 2px solid transparent;
+  border-radius: 4px;
+  background-clip: content-box;
+  transition: background 0.2s ease;
+}
 
-  /* Firefox 滚动条样式 */
-  scrollbar-width: thin;
-  scrollbar-color: #d9d9d9 transparent;
-
-  /* 滚动时的平滑效果 */
-  scroll-behavior: smooth;
+.file-list-scroll::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, rgba(61, 34, 102, 0.45), rgba(67, 123, 112, 0.45));
+  background-clip: content-box;
 }
 </style>

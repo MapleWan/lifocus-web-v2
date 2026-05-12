@@ -3,8 +3,9 @@ import type { FormInstanceFunctions, FormRule } from 'tdesign-vue-next'
 import type { Reactive } from 'vue'
 import type { ILoginParams } from '@/types/loginTypes'
 import Cookies from 'js-cookie'
+import { PageAgent } from 'page-agent'
 import { Button as TButton, Checkbox as TCheckbox, Form as TForm, FormItem as TFormItem, Input as TInput } from 'tdesign-vue-next'
-import { reactive, ref } from 'vue'
+import { onMounted, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { loginApi } from '@/api/auth'
 // import { useCustomMessage } from '@/hooks/useCustomMessage'
@@ -82,6 +83,37 @@ function login() {
 function goToRegister() {
   router.push({ name: 'register' })
 }
+
+// PageAgent 实例
+const pageAgent = ref<PageAgent | null>(null)
+
+onMounted(() => {
+  // 初始化 PageAgent
+  // 注意：需要配置自己的 LLM API Key
+  // 支持 OpenAI、通义千问等兼容接口
+  pageAgent.value = new PageAgent({
+    model: 'qwen-plus', // 或 'gpt-4o' 等
+    baseURL: 'https://dashscope.aliyuncs.com/compatible-mode/v1', // 通义千问 API
+    apiKey: import.meta.env.VITE_LLM_API_KEY || 'your-api-key-here', // 从环境变量获取
+    language: 'zh-CN',
+  })
+})
+
+// 测试 PageAgent 功能
+async function testPageAgent() {
+  if (pageAgent.value) {
+    try {
+      // 使用自然语言控制登录表单
+      await pageAgent.value.execute('在用户名输入框中输入 testuser')
+      await pageAgent.value.execute('在密码输入框中输入 123456')
+      useMessage.success('PageAgent 测试成功！')
+    }
+    catch (error) {
+      console.error('PageAgent error:', error)
+      useMessage.error('PageAgent 测试失败')
+    }
+  }
+}
 </script>
 
 <template>
@@ -127,6 +159,11 @@ function goToRegister() {
         <TFormItem>
           <TButton theme="primary" class="w-full" @click="login">
             Login
+          </TButton>
+        </TFormItem>
+        <TFormItem>
+          <TButton theme="default" variant="outline" class="w-full" @click="testPageAgent">
+            🤖 测试 PageAgent
           </TButton>
         </TFormItem>
       </TForm>

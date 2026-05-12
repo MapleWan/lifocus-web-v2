@@ -41,6 +41,9 @@ importers:
       md-editor-v3:
         specifier: ^6.3.1
         version: 6.3.1(vue@3.5.26(typescript@5.9.3))
+      page-agent:
+        specifier: ^1.5.4
+        version: 1.5.4(zod@4.3.6)
       pinia:
         specifier: ^3.0.4
         version: 3.0.4(typescript@5.9.3)(vue@3.5.26(typescript@5.9.3))
@@ -759,6 +762,22 @@ packages:
     resolution: {integrity: sha512-oGB+UxlgWcgQkgwo8GcEGwemoTFt3FIO9ababBmaGwXIoBKZ+GTy0pP185beGg7Llih/NSHSV2XAs1lnznocSg==}
     engines: {node: '>= 8'}
 
+  '@page-agent/core@1.5.4':
+    resolution: {integrity: sha512-xP4/sd8jqPShD0gRUGxFB+vgnxwc2mcBaccyLemdJaPPlyp37jtod5JISPR0rNM9aPWNiP9e3SRi/GoeucK8ng==}
+    peerDependencies:
+      zod: ^3.25.0 || ^4.0.0
+
+  '@page-agent/llms@1.5.4':
+    resolution: {integrity: sha512-OSQCrbPmLpQYNTGIkI6DSEx9b9DW0WpC0aBnZfEJKVH7FXAJj0xrCqVE8BOFs3arLDHkcfJgCJO5oA5sZTkvCQ==}
+    peerDependencies:
+      zod: ^3.25.0 || ^4.0.0
+
+  '@page-agent/page-controller@1.5.4':
+    resolution: {integrity: sha512-uKnUbXPPqHPbqrteaA7Tl+gdOFvGGWJq8U4xKEsCEf/2wtnRCtIQUlZFgDfG1u+DGNWo88ov88oDZV9Xn/o49w==}
+
+  '@page-agent/ui@1.5.4':
+    resolution: {integrity: sha512-gGzd2p//m26KvFqMewQAb3Rh84ViY3fOm9dmHwT0xn7+KB3XgcUd2zW5hwzbfgAktwOx2LGiyDPJgrakgTmdNQ==}
+
   '@parcel/watcher-android-arm64@2.5.6':
     resolution: {integrity: sha512-YQxSS34tPF/6ZG7r/Ih9xy+kP/WwediEUsqmtf0cuCV5TPPKw/PQHRhueUo6JdeFJaqV3pyjm0GdYjZotbRt/A==}
     engines: {node: '>= 10.0.0'}
@@ -1385,6 +1404,9 @@ packages:
     engines: {node: '>=0.4.0'}
     hasBin: true
 
+  ai-motion@0.4.8:
+    resolution: {integrity: sha512-9nQVjf8lrYQWSW0sZdb9bES4x8Ei1w9C0S62po2KvRbMjslmjm0WMeszyW771SEauDnu4YGWqurLZ/gCkCTosQ==}
+
   ajv@6.12.6:
     resolution: {integrity: sha512-j3fVLgvTo527anyYyJOGTYJbG+vnnQYvE0m5mmkc1TK+nxAppkCLMIL0aZ4dblVCNoGShhm+kzE4ZUykBoMg4g==}
 
@@ -1476,6 +1498,10 @@ packages:
   chalk@4.1.2:
     resolution: {integrity: sha512-oKnbhFyRIXpUuez8iBMmyEa4nbj4IOQyuhc/wy9kY7/WVPcwIO9VA668Pu8RkO7+0G76SLROeyw9CpQ061i4mA==}
     engines: {node: '>=10'}
+
+  chalk@5.6.2:
+    resolution: {integrity: sha512-7NzBL0rN6fMUW+f7A6Io4h40qQlG+xGmtMxfbnH/K7TAtt8JQWVQK+6g0UXKMeVJoyV5EkkNsErQ8pVD3bLHbA==}
+    engines: {node: ^12.17.0 || ^14.13 || >=16.0.0}
 
   change-case@5.4.4:
     resolution: {integrity: sha512-HRQyTk2/YPEkt9TnUPbOpr64Uw3KOicFWPVBb+xiHvd6eBx/qPr9xqfBFDT8P2vWsvvz4jbEkfDe71W3VyNu2w==}
@@ -2546,6 +2572,11 @@ packages:
   package-manager-detector@1.6.0:
     resolution: {integrity: sha512-61A5ThoTiDG/C8s8UMZwSorAGwMJ0ERVGj2OjoW5pAalsNOg15+iQiPzrLJ4jhZ1HJzmC2PIHT2oEiH3R5fzNA==}
 
+  page-agent@1.5.4:
+    resolution: {integrity: sha512-mhRQNvLq3Bp4E2bkBXpVVcIxK84YuzmzU7Dxrk7tRnDApA8bUpLNGmfk0ude3h+Pe9cJRXdZKutXghaXQV8Pmg==}
+    peerDependencies:
+      zod: ^3.25.0 || ^4.0.0
+
   parent-module@1.0.1:
     resolution: {integrity: sha512-GQ2EWRpQV8/o+Aw8YqtfZZPfNRWZYkbidE9k5rpl/hC3vtHHBfGm2Ifi6qWV+coDGkrUKZAxE3Lot5kcsRlh+g==}
     engines: {node: '>=6'}
@@ -3115,6 +3146,9 @@ packages:
   yocto-queue@0.1.0:
     resolution: {integrity: sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q==}
     engines: {node: '>=10'}
+
+  zod@4.3.6:
+    resolution: {integrity: sha512-rftlrkhHZOcjDwkGlnUtZZkvaPHCsDATp4pGpuOOMDaTdDDXF91wuVDJoWoPsKX/3YPQ5fHuF3STjcYyKr+Qhg==}
 
   zwitch@2.0.4:
     resolution: {integrity: sha512-bXE4cR/kVZhKZX/RjPEflHaKVhUVl85noU3v6b8apfQEc1x4A+zBxjZ4lN8LqGd6WZ3dl98pY4o717VFmoPp+A==}
@@ -3953,6 +3987,24 @@ snapshots:
       '@nodelib/fs.scandir': 2.1.5
       fastq: 1.20.1
 
+  '@page-agent/core@1.5.4(zod@4.3.6)':
+    dependencies:
+      '@page-agent/llms': 1.5.4(zod@4.3.6)
+      '@page-agent/page-controller': 1.5.4
+      chalk: 5.6.2
+      zod: 4.3.6
+
+  '@page-agent/llms@1.5.4(zod@4.3.6)':
+    dependencies:
+      chalk: 5.6.2
+      zod: 4.3.6
+
+  '@page-agent/page-controller@1.5.4':
+    dependencies:
+      ai-motion: 0.4.8
+
+  '@page-agent/ui@1.5.4': {}
+
   '@parcel/watcher-android-arm64@2.5.6':
     optional: true
 
@@ -4668,6 +4720,8 @@ snapshots:
 
   acorn@8.15.0: {}
 
+  ai-motion@0.4.8: {}
+
   ajv@6.12.6:
     dependencies:
       fast-deep-equal: 3.1.3
@@ -4753,6 +4807,8 @@ snapshots:
     dependencies:
       ansi-styles: 4.3.0
       supports-color: 7.2.0
+
+  chalk@5.6.2: {}
 
   change-case@5.4.4: {}
 
@@ -6024,6 +6080,15 @@ snapshots:
 
   package-manager-detector@1.6.0: {}
 
+  page-agent@1.5.4(zod@4.3.6):
+    dependencies:
+      '@page-agent/core': 1.5.4(zod@4.3.6)
+      '@page-agent/llms': 1.5.4(zod@4.3.6)
+      '@page-agent/page-controller': 1.5.4
+      '@page-agent/ui': 1.5.4
+      chalk: 5.6.2
+      zod: 4.3.6
+
   parent-module@1.0.1:
     dependencies:
       callsites: 3.1.0
@@ -6587,5 +6652,7 @@ snapshots:
   yaml@2.8.2: {}
 
   yocto-queue@0.1.0: {}
+
+  zod@4.3.6: {}
 
   zwitch@2.0.4: {}

@@ -13,7 +13,7 @@ import { ETimelineStatus, ETimelineType } from '@/utils/enums/timelineEnum'
 import TimelineItem from './timeline-item.vue'
 
 const useMessage = useTdMessage()
-type TimelineViewItem = {
+interface TimelineViewItem {
   endLabel: string
   item: TTimelineList[number]
   statusColor: string

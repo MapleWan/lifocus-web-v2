@@ -5,7 +5,7 @@ import type { ICategory } from '@/types/categoryTypes'
 import { useClipboard, useInfiniteScroll } from '@vueuse/core'
 import dayjs from 'dayjs'
 
-import { Input as TInput, Popconfirm as TPopconfirm, Popup as TPopup, Skeleton as TSkeleton, Tag as TTag } from 'tdesign-vue-next'
+import { Button as TButton, Input as TInput, Popconfirm as TPopconfirm, Popup as TPopup, Skeleton as TSkeleton, Tag as TTag } from 'tdesign-vue-next'
 import { computed, onMounted, ref, watch } from 'vue'
 import { deleteArticleApi, getArticleListApi, updateArticleApi } from '@/api/article'
 import CancelShare from '@/assets/svg/cancelShare.svg'
@@ -284,14 +284,15 @@ onMounted(() => {
                 </TPopconfirm>
 
                 <template v-if="article.is_shared">
-                  <button
-                    v-tooltip="{ content: '复制分享链接', placement: 'top' }"
-                    class="action-icon action-icon-accent"
-                    title="复制链接"
-                    @click.stop="copyShareLink(article)"
-                  >
-                    <CopyIcon />
-                  </button>
+                  <TPopup content="复制分享链接" placement="top">
+                    <button
+                      class="action-icon action-icon-accent"
+                      title="复制链接"
+                      @click.stop="copyShareLink(article)"
+                    >
+                      <CopyIcon />
+                    </button>
+                  </TPopup>
                   <TPopconfirm content="确定要取消分享吗？" @confirm="cancelShareArticle(article)">
                     <button class="action-icon" title="取消分享" @click.stop>
                       <CancelShare />

@@ -68,9 +68,11 @@ const highlights = ['Deep work', 'Project notes', 'Idea timeline']
   padding: 44px;
   overflow: hidden;
   color: #fff;
-  background:
+  /* background:
     linear-gradient(145deg, rgba(29, 17, 50, 0.94), rgba(37, 78, 72, 0.86)),
-    url('@/assets/images/favicon1.jpg') center / cover;
+    url('@/assets/images/favicon1.jpg') center / cover; */
+  background:
+    linear-gradient(145deg, rgba(29, 17, 50, 0.94), rgba(37, 78, 72, 0.86))
 }
 
 .auth-brand::after {
